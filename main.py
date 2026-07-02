@@ -7,12 +7,12 @@ while True:
     if work_buying == "выход":
         print(f"Ваш чек:")
         for item in cart:
-            print(f"{item["name"]} - {item["cost"]} руб. х {item["number"]} шт")
-            if total_sum >= 3000:
-                total_sum *= 0.9
-                print(f"Ваша общая цена: {total_sum}(скидка 10%)")
-            else:
-                print(f"Ваша общая цена: {total_sum}")
+            print(f"{item['name']} - {item['cost']} руб. х {item['number']} шт")
+        if total_sum >= 3000:
+            total_sum *= 0.9
+            print(f"Ваша общая цена: {total_sum}(скидка 10%)")
+        else:
+            print(f"Ваша общая цена: {total_sum}")
         break
     elif work_buying == "купить":
         item = {}
