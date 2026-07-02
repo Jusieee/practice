@@ -10,32 +10,47 @@ class Product:
     def get_total_cost(self):
         return self.price * self.quantity
 
+class ShoppingCart:
+    def __init__(self):
+        self.items = [] # Теперь список товаров живет ВНУТРИ корзины
+
+    def add_product(self, product):
+        self.items.append(product) # Метод для добавления товара в корзину
+
+    def get_total_sum(self):
+    # Метод, который пробегается по всем товарам в корзине
+    # и считает их общую «чистую» стоимость
+        total = 0
+        for item in self.items:
+            total += item.get_total_cost()
+        return total
+
 def get_display_price(price):
     if price >= 3000:
         price *= 0.9
         return price
     return price
 
-cart = []
-total_sum = 0
+my_cart = ShoppingCart()
 
 while True:
     work_buying = input('Выберите команду (купить/выход): ')
     if work_buying == "выход":
         print(f"Ваш чек:")
-        for item in cart:
+        for item in my_cart.items:
             print(f"{item.name} - {item.price} руб. х {item.quantity} шт")
-        final_price = get_display_price(total_sum)
-        print(f"Ваша общая цена: {final_price} руб")
+        final_price = my_cart.get_total_sum()
+        display_price = get_display_price(final_price)
+        print(f"Ваша общая цена: {display_price} руб")
         break
     elif work_buying == "купить":
         name = input("Название товара: ")
         cost = float(input("Цена товара: "))
         number = int(input("Количество товара: "))
         new_item = Product(name, cost, number)
-        cart.append(new_item)
-        total_sum += new_item.get_total_cost()
-        display_price = get_display_price(total_sum)
+        my_cart.add_product(new_item)
+        current_total = my_cart.get_total_sum()
+        display_price = get_display_price(current_total)
         print(f"Добавлен товар {name}, сейчас в корзине набрано на {display_price} руб.")
     else:
         print(f"Неизвестная команда, попробуйте еще раз!")
