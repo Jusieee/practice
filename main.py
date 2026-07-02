@@ -1,3 +1,9 @@
+def get_display_price(price):
+    if price >= 3000:
+        price *= 0.9
+        return price
+    return price
+
 cart = []
 item = {}
 total_sum = 0
@@ -22,13 +28,7 @@ while True:
         cart.append(item)
         summa = item["cost"] * item["number"]
         total_sum += summa
-        if total_sum >= 3000:
-            display_cost = total_sum * 0.9
-            print(f"Товар {item["name"]}, добавлен в корзину, вам доступна скидка 10% Ваша итоговая цена сейчас "
-                  f"составляет:{display_cost}")
-        else:
-            display_cost = total_sum
-            print(f"Товар {item["name"]}, добавлен в корзину, Для получение скидки, наберите корзину на 3000 рублей! "
-                  f"Ваша итоговая цена сейчас составляет: {display_cost}")
+        display_price = get_display_price(total_sum)
+        print(f"Добавлен товар {item['name']}, сейчас в корзине набрано на {display_price} руб.")
     else:
         print(f"Неизвестная команда, попробуйте еще раз!")
