@@ -40,6 +40,8 @@ while True:
             print(f"\n🎉 Ура! Вам доступна скидка 10% за заказ от 3000 руб.")
         print(f"Итого к оплате: {final_price} руб.")
         print("=================")
+        cursor.execute("DELETE FROM cart_items")
+        connection.commit()
         break
     else:
         print("Неизвестная команда!")
