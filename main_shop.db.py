@@ -19,11 +19,27 @@ while True:
         connection.commit()
         print("Товар успешно добавлен в вашу корзину!")
     elif work_buying == "выход":
-        print("\nВаш чек: ")
-        cursor.execute("SELECT * FROM cart_items")
-        cart_item = cursor.fetchall()
-        for cart in cart_item:
-            print(cart)
+        print("\n=== ВАШ ЧЕК ===")
+        cursor.execute("""
+            SELECT product.name, product.price, cart_items.quantity
+            FROM cart_items
+            JOIN product ON cart_items.product_id = product.id
+        """)
+        cart_items = cursor.fetchall()
+        total_sum = 0
+        for item in cart_items:
+            name = item[0]
+            price = item[1]
+            quantity = item[2]
+            item_cost = price * quantity
+            total_sum += item_cost
+            print(f"{name} — {price} руб. х {quantity} шт. = {item_cost} руб.")
+        final_price = total_sum
+        if total_sum >= 3000:
+            final_price = total_sum * 0.9
+            print(f"\n🎉 Ура! Вам доступна скидка 10% за заказ от 3000 руб.")
+        print(f"Итого к оплате: {final_price} руб.")
+        print("=================")
         break
     else:
         print("Неизвестная команда!")
