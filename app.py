@@ -1,7 +1,17 @@
 import sqlite3
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
+from pydantic import BaseModel, Field
 
 app = FastAPI()
+class CartItemCreate(BaseModel):
+    product_id: int = Field(
+        gt = 0,
+        description = "ID товара",
+    )
+    quantity: int = Field(
+        gt = 0,
+        description = "Количество товара",
+    )
 
 @app.get("/")
 def home():
