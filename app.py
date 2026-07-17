@@ -64,14 +64,14 @@ def add_to_cart(item: CartItemCreate):
         if item.quantity > product["stock"]:
             raise HTTPException(
                 status_code = status.HTTP_409_CONFLICT,
-                detail = f"Доступно {product["stock"]} шт. товара",
+                detail = f'Доступно {product["stock"]} шт. товара',
             )
 
         # Добавление товара в корзину
         cursor.execute(
             """
             INSERT INTO cart_items (product_id, quantity)
-            VALUE (?, ?)
+            VALUES (?, ?)
             """,
             (item.product_id, item.quantity),
         )
