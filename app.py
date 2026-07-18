@@ -94,3 +94,9 @@ def add_to_cart(item: CartItemCreate):
         )
     finally:
         connection.close()
+
+@app.get("/products/{product_id}")
+def get_product(product_id: int):
+    return {
+        "product_id": product_id
+    }
