@@ -1,5 +1,5 @@
 import sqlite3
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Path
 from pydantic import BaseModel, Field
 
 app = FastAPI()
@@ -96,7 +96,7 @@ def add_to_cart(item: CartItemCreate):
         connection.close()
 
 @app.get("/products/{product_id}")
-def get_product(product_id: int):
+def get_product(product_id: int = Path(gt=0)):
     connection = sqlite3.connect("online_shop.db")
     cursor = connection.cursor()
     cursor.execute(
