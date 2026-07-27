@@ -1,5 +1,7 @@
 import sqlite3
+
 from fastapi import FastAPI, HTTPException, status, Path
+
 from schemas import Product, CartItemCreate
 
 
@@ -28,7 +30,7 @@ def get_products():
 
 @app.post(
     "/cart/items",
-    status_code = status.HTTP_201_CREATED,
+    status_code=status.HTTP_201_CREATED,
 )
 def add_to_cart(item: CartItemCreate):
     connection = sqlite3.connect("online_shop.db")
@@ -48,15 +50,15 @@ def add_to_cart(item: CartItemCreate):
         # Проверка на наличие товара
         if product is None:
             raise HTTPException(
-                status_code = status.HTTP_404_NOT_FOUND,
-                detail = "Товар не найден",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Товар не найден",
             )
 
         # Проверка наличие товара на складе
         if item.quantity > product["stock"]:
             raise HTTPException(
-                status_code = status.HTTP_409_CONFLICT,
-                detail = f'Доступно {product["stock"]} шт. товара',
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f'Доступно {product["stock"]} шт. товара',
             )
 
         # Добавление товара в корзину
@@ -81,8 +83,8 @@ def add_to_cart(item: CartItemCreate):
     except sqlite3.Error:
         connection.rollback()
         raise HTTPException(
-            status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail = "Ошибка при работе в базе данных"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при работе в базе данных"
         )
     finally:
         connection.close()
