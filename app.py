@@ -112,7 +112,7 @@ def get_product(product_id: int = Path(gt=0)):
 
     if product is None:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Товар не найден",
         )
 
