@@ -97,6 +97,28 @@ def add_to_cart(item: CartItemCreate):
 
 @app.get("/products/{product_id}")
 def get_product(product_id: int):
+    connection = sqlite3.connect("online_shop.db")
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT id, name, price, stock
+        FROM product
+        WHERE id = ?
+        """,
+        (product_id,),
+    )
+    product = cursor.fetchone()
+    connection.close()
+
+    if product is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Товар не найден",
+        )
+
     return {
-        "product_id": product_id
+        "id": product[0],
+        "name": product[1],
+        "price": product[2],
+        "stock": product[3],
     }
