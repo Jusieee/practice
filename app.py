@@ -1,6 +1,7 @@
 import sqlite3
 from fastapi import FastAPI, HTTPException, status, Path
 from pydantic import BaseModel, Field
+from schemas import Product
 
 app = FastAPI()
 class CartItemCreate(BaseModel):
@@ -17,7 +18,7 @@ class CartItemCreate(BaseModel):
 def home():
     return {"message": "Добро пожаловать в API нашего интернет-магазина!"}
 
-@app.get("/products")
+@app.get("/products", response_model=list[Product])
 def get_products():
     connection = sqlite3.connect("online_shop.db")
     cursor = connection.cursor()
@@ -95,7 +96,7 @@ def add_to_cart(item: CartItemCreate):
     finally:
         connection.close()
 
-@app.get("/products/{product_id}")
+@app.get("/products/{product_id}", response_model=Product)
 def get_product(product_id: int = Path(gt=0)):
     connection = sqlite3.connect("online_shop.db")
     cursor = connection.cursor()
