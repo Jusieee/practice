@@ -2,7 +2,7 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, status, Path
 
-from schemas import Product, CartItemCreate
+from schemas import Product, CartItemCreate, ProductCreate
 
 
 app = FastAPI()
@@ -27,6 +27,47 @@ def get_products():
             "stock": p[3]
         })
     return result
+
+@app.post(
+    "/products",
+    response_model=Product,
+    status_code=status.HTTP_201_CREATED
+)
+def create_product(product: ProductCreate):
+    connection = sqlite3.connect("online_shop.db")
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            INSERT INTO product (name, price, stock)
+            VALUES (?, ?, ?)
+            """,
+            (
+                product.name,
+                product.price,
+                product.stock,
+            ),
+        )
+
+        connection.commit()
+
+        return {
+            "id": cursor.lastrowid,
+            "name": product.name,
+            "price": product.price,
+            "stock": product.stock,
+        }
+    except sqlite3.Error:
+        connection.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Товар не удалось создать"
+        )
+
+    finally:
+        connection.close()
 
 @app.post(
     "/cart/items",
