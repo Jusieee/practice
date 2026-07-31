@@ -52,7 +52,7 @@ def create_product(product: ProductCreate):
         if exciting_product is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Такой товар уже есть"
+                detail="Такой товар уже есть",
             )
 
         cursor.execute(
