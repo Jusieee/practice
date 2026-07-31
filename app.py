@@ -40,6 +40,23 @@ def create_product(product: ProductCreate):
     try:
         cursor.execute(
             """
+            SELECT id
+            from product
+            WHERE name = ?
+            """,
+            (product.name,),
+        )
+
+        exciting_product = cursor.fetchone()
+
+        if exciting_product is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Такой товар уже есть"
+            )
+
+        cursor.execute(
+            """
             INSERT INTO product (name, price, stock)
             VALUES (?, ?, ?)
             """,
