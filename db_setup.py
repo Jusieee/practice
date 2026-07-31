@@ -12,6 +12,13 @@ stock INTEGER DEFAULT 0
 )
 """)
 
+cursor.execute(
+    """
+    CREATE UNIQUE INDEX IF NOT EXIST idx_product_name_unique
+    ON product (name COLLATE NO CASE)
+    """
+)
+
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS cart_items(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
