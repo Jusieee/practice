@@ -14,8 +14,8 @@ stock INTEGER DEFAULT 0
 
 cursor.execute(
     """
-    CREATE UNIQUE INDEX IF NOT EXIST idx_product_name_unique
-    ON product (name COLLATE NO CASE)
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_product_name_unique
+    ON product (name COLLATE NOCASE)
     """
 )
 
