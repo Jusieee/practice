@@ -47,9 +47,9 @@ def create_product(product: ProductCreate):
             (product.name,),
         )
 
-        exciting_product = cursor.fetchone()
+        existing_product = cursor.fetchone()
 
-        if exciting_product is not None:
+        if existing_product is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Такой товар уже есть",
