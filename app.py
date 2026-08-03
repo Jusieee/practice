@@ -79,6 +79,14 @@ def create_product(product: ProductCreate):
             "price": product.price,
             "stock": product.stock,
         }
+    except sqlite3.IntegrityError:
+        connection.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Такой товар уже есть"
+        )
+
     except sqlite3.Error:
         connection.rollback()
 
