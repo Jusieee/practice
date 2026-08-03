@@ -38,13 +38,16 @@ def create_product(product: ProductCreate):
     cursor = connection.cursor()
 
     try:
+        product_name = product.name.strip()
+        product_name_key = product_name.casefold()
+
         cursor.execute(
             """
             SELECT id
             from product
             WHERE name = ?
             """,
-            (product.name,),
+            (product_name_key,),
         )
 
         existing_product = cursor.fetchone()
@@ -57,13 +60,14 @@ def create_product(product: ProductCreate):
 
         cursor.execute(
             """
-            INSERT INTO product (name, price, stock)
-            VALUES (?, ?, ?)
+            INSERT INTO product (name, price, stock, name_key)
+            VALUES (?, ?, ?, ?)
             """,
             (
-                product.name,
+                product_name,
                 product.price,
                 product.stock,
+                product_name_key,
             ),
         )
 
@@ -71,7 +75,7 @@ def create_product(product: ProductCreate):
 
         return {
             "id": cursor.lastrowid,
-            "name": product.name,
+            "name": product_name,
             "price": product.price,
             "stock": product.stock,
         }
