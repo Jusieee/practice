@@ -46,7 +46,7 @@ def create_product(product: ProductCreate):
             """
             SELECT id
             from product
-            WHERE name = ?
+            WHERE name_key = ?
             """,
             (product_name_key,),
         )
@@ -217,7 +217,7 @@ def delete_product(product_id: int = Path(gt=0)):
             DELETE FROM product
             WHERE id = ?
             """,
-            (prod_id,)
+            (product_id,)
         )
         connection.commit()
 
