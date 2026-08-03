@@ -8,16 +8,10 @@ CREATE TABLE IF NOT EXISTS product(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 name TEXT NOT NULL,
 price REAL NOT NULL,
-stock INTEGER DEFAULT 0
+stock INTEGER DEFAULT 0,
+name_key TEXT NOT NULL UNIQUE
 )
 """)
-
-cursor.execute(
-    """
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_product_name_unique
-    ON product (name COLLATE NOCASE)
-    """
-)
 
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS cart_items(
