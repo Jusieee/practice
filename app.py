@@ -6,7 +6,7 @@ from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 from database import get_connection
 
-from repositories import get_product_by_id
+from repositories import get_product_by_id, get_all_products
 
 
 app = FastAPI()
@@ -17,11 +17,7 @@ def home():
 
 @app.get("/products", response_model=list[Product])
 def get_products():
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM product")
-    products = cursor.fetchall()
-    connection.close()
+    products = get_all_products()
     return [
         {
             "id": product["id"],
