@@ -6,6 +6,8 @@ from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 from database import get_connection
 
+from repositories import get_product_by_id
+
 
 app = FastAPI()
 
@@ -162,18 +164,7 @@ def add_to_cart(item: CartItemCreate):
 
 @app.get("/products/{product_id}", response_model=Product)
 def get_product(product_id: int = Path(gt=0)):
-    connection = get_connection()
-    cursor = connection.cursor()
-    cursor.execute(
-        """
-        SELECT id, name, price, stock
-        FROM product
-        WHERE id = ?
-        """,
-        (product_id,),
-    )
-    product = cursor.fetchone()
-    connection.close()
+    product = get_product_by_id(product_id)
 
     if product is None:
         raise HTTPException(
