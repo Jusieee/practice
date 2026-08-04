@@ -6,7 +6,7 @@ from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 from database import get_connection
 
-from repositories import get_product_by_id, get_all_products
+from repositories import delete_product_by_id, get_all_products, get_product_by_id
 
 
 app = FastAPI()
@@ -180,42 +180,18 @@ def get_product(product_id: int = Path(gt=0)):
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_product(product_id: int = Path(gt=0)):
-    connection = get_connection()
-    cursor = connection.cursor()
     try:
-        cursor.execute(
-            """
-            SELECT id
-            FROM product
-            WHERE id = ?
-            """,
-            (product_id,)
-            )
-        prod_id = cursor.fetchone()
-
-        if prod_id is None:
+        deleted = delete_product_by_id(product_id)
+        if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Такого товара нету"
             )
-
-        cursor.execute(
-            """
-            DELETE FROM product
-            WHERE id = ?
-            """,
-            (product_id,)
-        )
-        connection.commit()
-
     except sqlite3.Error:
-        connection.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
-    finally:
-        connection.close()
 
 @app.put("/products/{product_id}",
          response_model=Product)

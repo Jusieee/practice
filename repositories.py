@@ -1,3 +1,5 @@
+import sqlite3
+
 from database import get_connection
 
 
@@ -34,6 +36,31 @@ def get_all_products():
         )
 
         return cursor.fetchall()
+
+    finally:
+        connection.close()
+
+
+def delete_product_by_id(product_id: int) -> bool:
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            DELETE FROM product
+            WHERE id = ?
+            """,
+            (product_id,)
+        )
+
+        connection.commit()
+
+        return cursor.rowcount > 0
+
+    except sqlite3.Error:
+        connection.rollback()
+        raise
 
     finally:
         connection.close()
