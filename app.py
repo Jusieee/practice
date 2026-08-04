@@ -4,6 +4,8 @@ from fastapi import FastAPI, HTTPException, status, Path
 
 from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
+from database import get_connection
+
 
 app = FastAPI()
 
@@ -161,7 +163,7 @@ def add_to_cart(item: CartItemCreate):
 
 @app.get("/products/{product_id}", response_model=Product)
 def get_product(product_id: int = Path(gt=0)):
-    connection = sqlite3.connect("online_shop.db")
+    connection = get_connection()
     cursor = connection.cursor()
     cursor.execute(
         """
@@ -181,10 +183,10 @@ def get_product(product_id: int = Path(gt=0)):
         )
 
     return {
-        "id": product[0],
-        "name": product[1],
-        "price": product[2],
-        "stock": product[3],
+        "id": product["id"],
+        "name": product["name"],
+        "price": product["price"],
+        "stock": product["stock"],
     }
 
 @app.delete(
