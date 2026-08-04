@@ -1,7 +1,6 @@
 import sqlite3
 
 from fastapi import FastAPI, HTTPException, status, Path
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
 
 from schemas import Product, CartItemCreate, ProductCreate
 
@@ -208,7 +207,7 @@ def delete_product(product_id: int = Path(gt=0)):
 
         if prod_id is None:
             raise HTTPException(
-                status_code=HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Такого товара нету"
             )
 
@@ -224,7 +223,7 @@ def delete_product(product_id: int = Path(gt=0)):
     except sqlite3.Error:
         connection.rollback()
         raise HTTPException(
-            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
     finally:
