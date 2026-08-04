@@ -15,20 +15,20 @@ def home():
 
 @app.get("/products", response_model=list[Product])
 def get_products():
-    connection = sqlite3.connect("online_shop.db")
+    connection = get_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM product")
     products = cursor.fetchall()
     connection.close()
-    result = []
-    for p in products:
-        result.append({
-            "id": p[0],
-            "name": p[1],
-            "price": p[2],
-            "stock": p[3]
-        })
-    return result
+    return [
+        {
+            "id": product["id"],
+            "name": product["name"],
+            "price": product["price"],
+            "stock": product["stock"]
+        }
+        for product in products
+    ]
 
 @app.post(
     "/products",
@@ -36,7 +36,7 @@ def get_products():
     status_code=status.HTTP_201_CREATED
 )
 def create_product(product: ProductCreate):
-    connection = sqlite3.connect("online_shop.db")
+    connection = get_connection()
     cursor = connection.cursor()
 
     try:
@@ -105,8 +105,7 @@ def create_product(product: ProductCreate):
     status_code=status.HTTP_201_CREATED,
 )
 def add_to_cart(item: CartItemCreate):
-    connection = sqlite3.connect("online_shop.db")
-    connection.row_factory = sqlite3.Row
+    connection = get_connection()
     cursor = connection.cursor()
     try:
         cursor.execute(
@@ -194,7 +193,7 @@ def get_product(product_id: int = Path(gt=0)):
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_product(product_id: int = Path(gt=0)):
-    connection = sqlite3.connect("online_shop.db")
+    connection = get_connection()
     cursor = connection.cursor()
     try:
         cursor.execute(
@@ -238,7 +237,7 @@ def update_product(
     product_id: int = Path(gt=0),
 ):
 
-    connection = sqlite3.connect("online_shop.db")
+    connection = get_connection()
     cursor = connection.cursor()
 
     try:
