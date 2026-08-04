@@ -2,7 +2,7 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, status, Path
 
-from schemas import Product, CartItemCreate, ProductCreate
+from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 
 app = FastAPI()
@@ -226,5 +226,70 @@ def delete_product(product_id: int = Path(gt=0)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
+    finally:
+        connection.close()
+
+@app.put("/products/{product_id}",
+         response_model=Product)
+def update_product(
+    product: ProductUpdate,
+    product_id: int = Path(gt=0),
+):
+
+    connection = sqlite3.connect("online_shop.db")
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT id
+            FROM product
+            WHERE id = ?
+            """,
+            (product_id,)
+        )
+        prod_id = cursor.fetchone()
+        if prod_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Такого товара нету"
+            )
+
+        product_name = product.name.strip()
+        product_name_key = product_name.casefold()
+
+        cursor.execute(
+            """
+            UPDATE product
+            SET name = ?,
+                price = ?,
+                stock = ?,
+                name_key = ?
+            WHERE id = ?
+            """,
+            (product_id,)
+        )
+        connection.commit()
+
+        return {
+            "name": product_name,
+            "id": product_id,
+            "price": product.price,
+            "stock": product.stock
+        }
+
+    except sqlite3.IntegrityError:
+        connection.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Товар с такой информацией уже есть"
+        )
+    except sqlite3.Error:
+        connection.rollback()
+        raise  HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Серверная ошибка"
+        )
+
     finally:
         connection.close()
