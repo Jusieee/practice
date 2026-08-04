@@ -267,7 +267,7 @@ def update_product(
                 name_key = ?
             WHERE id = ?
             """,
-            (product_id,)
+            (product_name, product.price, product.stock, product_name_key, product_id)
         )
         connection.commit()
 
