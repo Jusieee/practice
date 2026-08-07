@@ -127,7 +127,8 @@ def update_product_by_id(
     finally:
         connection.close()
 
-def create_product (
+
+def create_product(
         name: str,
         price: float,
         stock: int
