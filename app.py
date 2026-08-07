@@ -5,7 +5,6 @@ from fastapi import FastAPI, HTTPException, status, Path
 from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 from repositories import (
-    create_cart_item,
     create_product,
     delete_product_by_id,
     get_all_products,
