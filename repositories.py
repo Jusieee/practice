@@ -198,3 +198,23 @@ def create_cart_item(
 
     finally:
         connection.close()
+
+
+def get_cart_item_by_product_id(product_id: int):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT id, product_id, quantity
+            FROM cart_items
+            WHERE product_id = ?
+            """,
+            (product_id,)
+        )
+
+        return cursor.fetchone()
+
+    finally:
+        connection.close()
