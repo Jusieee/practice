@@ -39,12 +39,11 @@ def add_product_to_cart(
             quantity=quantity
         )
     else:
-        cart_item_id = update_cart_item_quantity(
+        update_cart_item_quantity(
             cart_item_id=cart_item["id"],
             quantity=total_quantity
         )
-
-    cart_item_id = cart_item["id"]
+        cart_item_id = cart_item["id"]
 
     return {
         "id": cart_item_id,
