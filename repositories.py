@@ -168,3 +168,33 @@ def create_product(
 
     finally:
         connection.close()
+
+
+def create_cart_item(
+        product_id: int,
+        quantity: int
+):
+
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute(
+            """
+            INSERT INTO cart_item (product_id, quantity)
+            VALUES (?, ?)
+            """,
+            (product_id, quantity)
+        )
+
+        connection.commit()
+
+        return cursor.lastrowid
+
+    except sqlite3.Error:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()

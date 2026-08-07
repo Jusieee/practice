@@ -7,6 +7,7 @@ from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 from database import get_connection
 
 from repositories import (
+    create_cart_item,
     create_product,
     delete_product_by_id,
     get_all_products,
@@ -65,20 +66,10 @@ def create_product_endpoint(product: ProductCreate):
     status_code=status.HTTP_201_CREATED,
 )
 def add_to_cart(item: CartItemCreate):
-    connection = get_connection()
-    cursor = connection.cursor()
-    try:
-        cursor.execute(
-            """
-            SELECT id, name, stock
-            FROM product
-            WHERE id = ?
-            """,
-            (item.product_id,)
-        )
-        product = cursor.fetchone()
 
-        # Проверка на наличие товара
+    try:
+        product = get_product_by_id()
+
         if product is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -93,32 +84,26 @@ def add_to_cart(item: CartItemCreate):
             )
 
         # Добавление товара в корзину
-        cursor.execute(
-            """
-            INSERT INTO cart_items (product_id, quantity)
-            VALUES (?, ?)
-            """,
-            (item.product_id, item.quantity),
+        cart_item_id = create_cart_item(
+            product_id=item.product_id,
+            quantity=item.quantity
         )
-        connection.commit()
 
         return {
             "message": "Товар добавлен",
             "cart_item": {
-                "id": cursor.lastrowid,
+                "id": cart_item_id,
                 "product_id": item.product_id,
                 "product_name": product["name"],
                 "quantity": item.quantity,
             },
         }
     except sqlite3.Error:
-        connection.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка при работе в базе данных"
         )
-    finally:
-        connection.close()
+
 
 @app.get("/products/{product_id}", response_model=Product)
 def get_product(product_id: int = Path(gt=0)):
