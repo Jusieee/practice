@@ -30,7 +30,7 @@ class CartItemCreate(BaseModel):
 class ProductUpdate(BaseModel):
     name: str = Field(
         min_length=1,
-        max_lenght=100,
+        max_length=100,
     )
     price: float = Field(gt=0)
     stock: int = Field(ge=0)
