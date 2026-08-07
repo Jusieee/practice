@@ -36,13 +36,15 @@ def add_product_to_cart(
     if cart_item is None:
         cart_item_id = create_cart_item(
             product_id=product_id,
-            quantity=total_quantity
+            quantity=quantity
         )
     else:
         cart_item_id = update_cart_item_quantity(
             cart_item_id=cart_item["id"],
             quantity=total_quantity
         )
+
+    cart_item_id = cart_item["id"]
 
     return {
         "id": cart_item_id,
