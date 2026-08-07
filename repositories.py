@@ -239,6 +239,8 @@ def update_cart_item_quantity(
 
         connection.commit()
 
+        return cart_item_id
+
     except sqlite3.Error:
         connection.rollback()
         raise
