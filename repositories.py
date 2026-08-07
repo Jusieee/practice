@@ -218,3 +218,30 @@ def get_cart_item_by_product_id(product_id: int):
 
     finally:
         connection.close()
+
+
+def update_cart_item_quantity(
+        cart_item_id: int,
+        quantity: int
+):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            UPDATE cart_items
+            SET quantity = ?
+            WHERE id = ?
+            """,
+            (quantity, cart_item_id)
+        )
+
+        connection.commit()
+
+    except sqlite3.Error:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()

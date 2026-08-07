@@ -1,4 +1,9 @@
-from repositories import create_cart_item, get_product_by_id
+from repositories import (
+    create_cart_item,
+    get_cart_item_by_product_id,
+    get_product_by_id,
+    update_cart_item_quantity
+)
 
 
 class ProductNotFoundError(Exception):
@@ -18,17 +23,30 @@ def add_product_to_cart(
     if product is None:
         raise ProductNotFoundError
 
-    if quantity > product["stock"]:
+    cart_item = get_cart_item_by_product_id(product_id)
+
+    if cart_item is None:
+        total_quantity = quantity
+    else:
+        total_quantity = cart_item["quantity"] + quantity
+
+    if total_quantity > product["stock"]:
         raise InsufficientStockError(product["stock"])
 
-    cart_item_id = create_cart_item(
-        product_id=product_id,
-        quantity=quantity
-    )
+    if cart_item is None:
+        cart_item_id = create_cart_item(
+            product_id=product_id,
+            quantity=total_quantity
+        )
+    else:
+        cart_item_id = update_cart_item_quantity(
+            cart_item_id=cart_item["id"],
+            quantity=total_quantity
+        )
 
     return {
         "id": cart_item_id,
         "product_id": product_id,
         "product_name": product["name"],
-        "quantity": quantity
+        "quantity": total_quantity
     }
