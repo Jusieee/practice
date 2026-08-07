@@ -4,8 +4,6 @@ from fastapi import FastAPI, HTTPException, status, Path
 
 from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
-from database import get_connection
-
 from repositories import (
     create_cart_item,
     create_product,
@@ -13,6 +11,12 @@ from repositories import (
     get_all_products,
     get_product_by_id,
     update_product_by_id
+)
+
+from services import (
+    add_product_to_cart,
+    InsufficientStockError,
+    ProductNotFoundError,
 )
 
 app = FastAPI()
@@ -68,36 +72,25 @@ def create_product_endpoint(product: ProductCreate):
 def add_to_cart(item: CartItemCreate):
 
     try:
-        product = get_product_by_id(item.product_id)
-
-        if product is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Товар не найден",
-            )
-
-        # Проверка наличие товара на складе
-        if item.quantity > product["stock"]:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f'Доступно {product["stock"]} шт. товара',
-            )
-
         # Добавление товара в корзину
-        cart_item_id = create_cart_item(
+        cart_item = add_product_to_cart(
             product_id=item.product_id,
             quantity=item.quantity
         )
+        return cart_item
 
-        return {
-            "message": "Товар добавлен",
-            "cart_item": {
-                "id": cart_item_id,
-                "product_id": item.product_id,
-                "product_name": product["name"],
-                "quantity": item.quantity,
-            },
-        }
+    except ProductNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Товар не найден"
+        )
+
+    except InsufficientStockError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Недостаточно товаров, доступно {error.available}"
+        )
+
     except sqlite3.Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
