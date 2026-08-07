@@ -182,7 +182,7 @@ def create_cart_item(
 
         cursor.execute(
             """
-            INSERT INTO cart_item (product_id, quantity)
+            INSERT INTO cart_items (product_id, quantity)
             VALUES (?, ?)
             """,
             (product_id, quantity)

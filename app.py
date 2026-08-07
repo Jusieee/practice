@@ -68,7 +68,7 @@ def create_product_endpoint(product: ProductCreate):
 def add_to_cart(item: CartItemCreate):
 
     try:
-        product = get_product_by_id()
+        product = get_product_by_id(item.product_id)
 
         if product is None:
             raise HTTPException(
