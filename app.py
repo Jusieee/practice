@@ -6,8 +6,13 @@ from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 from database import get_connection
 
-from repositories import delete_product_by_id, get_all_products, get_product_by_id, update_product_by_id
-
+from repositories import (
+    create_product,
+    delete_product_by_id,
+    get_all_products,
+    get_product_by_id,
+    update_product_by_id
+)
 
 app = FastAPI()
 
@@ -33,70 +38,27 @@ def get_products():
     response_model=Product,
     status_code=status.HTTP_201_CREATED
 )
-def create_product(product: ProductCreate):
-    connection = get_connection()
-    cursor = connection.cursor()
+def create_product_endpoint(product: ProductCreate):
 
     try:
-        product_name = product.name.strip()
-        product_name_key = product_name.casefold()
-
-        cursor.execute(
-            """
-            SELECT id
-            from product
-            WHERE name_key = ?
-            """,
-            (product_name_key,),
+        return create_product(
+            name=product.name,
+            price=product.price,
+            stock=product.stock
         )
 
-        existing_product = cursor.fetchone()
-
-        if existing_product is not None:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Такой товар уже есть",
-            )
-
-        cursor.execute(
-            """
-            INSERT INTO product (name, price, stock, name_key)
-            VALUES (?, ?, ?, ?)
-            """,
-            (
-                product_name,
-                product.price,
-                product.stock,
-                product_name_key,
-            ),
-        )
-
-        connection.commit()
-
-        return {
-            "id": cursor.lastrowid,
-            "name": product_name,
-            "price": product.price,
-            "stock": product.stock,
-        }
     except sqlite3.IntegrityError:
-        connection.rollback()
-
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Такой товар уже есть"
         )
 
     except sqlite3.Error:
-        connection.rollback()
-
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Товар не удалось создать"
         )
 
-    finally:
-        connection.close()
 
 @app.post(
     "/cart/items",

@@ -126,3 +126,44 @@ def update_product_by_id(
 
     finally:
         connection.close()
+
+def create_product (
+        name: str,
+        price: float,
+        stock: int
+):
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        product_name = name.strip()
+        product_name_key = product_name.casefold()
+
+        cursor.execute(
+            """
+            INSERT INTO product (
+                name,
+                price,
+                stock,
+                name_key
+            )
+            VALUES (?, ?, ?, ?)
+            """,
+            (product_name, price, stock, product_name_key)
+        )
+
+        connection.commit()
+
+        return {
+            "id": cursor.lastrowid,
+            "name": product_name,
+            "price": price,
+            "stock": stock
+        }
+
+    except sqlite3.Error:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()
