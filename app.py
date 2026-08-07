@@ -204,7 +204,7 @@ def update_product(
         updated_product = update_product_by_id(
             product_id=product_id,
             name=product.name,
-            price=product.float,
+            price=product.price,
             stock=product.stock
         )
 

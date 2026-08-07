@@ -96,9 +96,9 @@ def update_product_by_id(
         cursor.execute(
             """
             UPDATE product
-            SET name = ?
-                price = ?
-                stock = ?
+            SET name = ?,
+                price = ?,
+                stock = ?,
                 name_key = ?
             WHERE id = ?
             """,
