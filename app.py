@@ -6,7 +6,7 @@ from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
 
 from database import get_connection
 
-from repositories import delete_product_by_id, get_all_products, get_product_by_id
+from repositories import delete_product_by_id, get_all_products, get_product_by_id, update_product_by_id
 
 
 app = FastAPI()
@@ -200,60 +200,29 @@ def update_product(
     product_id: int = Path(gt=0),
 ):
 
-    connection = get_connection()
-    cursor = connection.cursor()
-
     try:
-        cursor.execute(
-            """
-            SELECT id
-            FROM product
-            WHERE id = ?
-            """,
-            (product_id,)
+        updated_product = update_product_by_id(
+            product_id=product_id,
+            name=product.name,
+            price=product.float,
+            stock=product.stock
         )
-        prod_id = cursor.fetchone()
-        if prod_id is None:
+
+        if updated_product is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Такого товара нету"
             )
 
-        product_name = product.name.strip()
-        product_name_key = product_name.casefold()
-
-        cursor.execute(
-            """
-            UPDATE product
-            SET name = ?,
-                price = ?,
-                stock = ?,
-                name_key = ?
-            WHERE id = ?
-            """,
-            (product_name, product.price, product.stock, product_name_key, product_id)
-        )
-        connection.commit()
-
-        return {
-            "name": product_name,
-            "id": product_id,
-            "price": product.price,
-            "stock": product.stock
-        }
+        return updated_product
 
     except sqlite3.IntegrityError:
-        connection.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Товар с такой информацией уже есть"
         )
     except sqlite3.Error:
-        connection.rollback()
         raise  HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
-
-    finally:
-        connection.close()
