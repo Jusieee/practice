@@ -78,5 +78,3 @@ def remove_product_from_cart(product_id: int):
 
     if not removed:
         raise CartItemNotFoundError
-    else:
-        print("Товар успешно удален!")
