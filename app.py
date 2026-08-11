@@ -14,9 +14,11 @@ from repositories import (
 
 from services import (
     add_product_to_cart,
+    CartItemNotFoundError,
     get_cart,
     InsufficientStockError,
     ProductNotFoundError,
+    remove_product_from_cart,
 )
 
 app = FastAPI()
@@ -171,6 +173,25 @@ def update_product(
 def get_cart_endpoint():
     try:
         return get_cart()
+
+    except sqlite3.Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Серверная ошибка"
+        )
+
+
+@app.delete("/cart/items/{product_id}",
+            status_code=status.HTTP_204_NO_CONTENT)
+def delete_cart_items_endpoint(product_id: int = Path(gt=0)):
+    try:
+        remove_product_from_cart(product_id)
+
+    except CartItemNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Товар не найден"
+        )
 
     except sqlite3.Error:
         raise HTTPException(

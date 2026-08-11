@@ -1,5 +1,6 @@
 from repositories import (
     create_cart_item,
+    delete_cart_item_by_product_id,
     get_cart_items,
     get_cart_item_by_product_id,
     get_product_by_id,
@@ -14,6 +15,8 @@ class InsufficientStockError(Exception):
     def __init__(self, available: int):
         self.available = available
 
+class CartItemNotFoundError(Exception):
+    pass
 
 def add_product_to_cart(
         product_id: int,
@@ -68,3 +71,12 @@ def get_cart():
         "items": items,
         "total": total
     }
+
+
+def remove_product_from_cart(product_id: int):
+    removed = delete_cart_item_by_product_id(product_id)
+
+    if not removed:
+        raise CartItemNotFoundError
+    else:
+        print("Товар успешно удален!")
