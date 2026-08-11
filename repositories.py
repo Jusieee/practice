@@ -274,7 +274,7 @@ def get_cart_items():
         connection.close()
 
 
-def delete_cart_items_by_product_id(product_id: int) -> bool:
+def delete_cart_item_by_product_id(product_id: int) -> bool:
     connection = get_connection()
     cursor = connection.cursor()
 
