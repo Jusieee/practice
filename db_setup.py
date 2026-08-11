@@ -21,6 +21,13 @@ quantity INTEGER DEFAULT 0
 )
 ''')
 
+cursor.execute(
+    """
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_cart_items_product_id
+    ON cart_items(product_id)
+    """
+)
+
 connection.commit()
 connection.close()
 
