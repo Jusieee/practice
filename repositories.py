@@ -272,3 +272,28 @@ def get_cart_items():
 
     finally:
         connection.close()
+
+
+def delete_cart_items_by_product_id(product_id: int) -> bool:
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            DELETE FROM cart_items
+            WHERE product_id = ?
+            """,
+            (product_id,)
+        )
+
+        connection.commit()
+
+        return cursor.rowcount > 0
+
+    except sqlite3.Error:
+        connection.rollback()
+        raise
+
+    finally:
+        connection.close()
