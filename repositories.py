@@ -247,3 +247,28 @@ def update_cart_item_quantity(
 
     finally:
         connection.close()
+
+
+def get_cart_items():
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    try:
+        cursor.execute(
+            """
+            SELECT 
+                cart_items.id,
+                cart_items.product_id,
+                product.name,
+                product.price,
+                cart_items.quantity
+            FROM cart_items
+            JOIN product
+                ON cart_items.product_id = product.id
+            """
+        )
+
+        return cursor.fetchall()
+
+    finally:
+        connection.close()
