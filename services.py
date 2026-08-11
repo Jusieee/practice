@@ -1,5 +1,6 @@
 from repositories import (
     create_cart_item,
+    get_cart_items,
     get_cart_item_by_product_id,
     get_product_by_id,
     update_cart_item_quantity
@@ -51,3 +52,18 @@ def add_product_to_cart(
         "product_name": product["name"],
         "quantity": total_quantity
     }
+
+
+def get_cart():
+    cart_items = get_cart_items()
+
+    return [
+        {
+            "id": item["id"],
+            "product_id": item["product_id"],
+            "product_name": item["name"],
+            "price": item["price"],
+            "quantity": item["quantity"]
+        }
+        for item in cart_items
+    ]

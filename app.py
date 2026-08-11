@@ -14,6 +14,7 @@ from repositories import (
 
 from services import (
     add_product_to_cart,
+    get_cart,
     InsufficientStockError,
     ProductNotFoundError,
 )
@@ -162,6 +163,17 @@ def update_product(
         )
     except sqlite3.Error:
         raise  HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Серверная ошибка"
+        )
+
+@app.get("/cart")
+def get_cart_endpoint():
+    try:
+        return get_cart()
+
+    except sqlite3.Error:
+        raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
