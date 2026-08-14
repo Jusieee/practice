@@ -87,3 +87,23 @@ def remove_product_from_cart(product_id: int):
 
     if not removed:
         raise CartItemNotFoundError
+
+
+def set_cart_item_quantity(
+        product_id: int,
+        quantity: int
+):
+    product = get_product_by_id(product_id)
+
+    if not product:
+        raise ProductNotFoundError
+
+    cart_item = get_cart_item_by_product_id(product_id)
+
+    if not cart_item:
+        raise CartItemNotFoundError
+
+    if cart_item["quantity"] > product["stock"]:
+        raise InsufficientStockError(product["stock"])
+
+    return update_cart_item_quantity(product_id, quantity)
