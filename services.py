@@ -103,7 +103,14 @@ def set_cart_item_quantity(
     if not cart_item:
         raise CartItemNotFoundError
 
-    if cart_item["quantity"] > product["stock"]:
+    if quantity > product["stock"]:
         raise InsufficientStockError(product["stock"])
 
-    return update_cart_item_quantity(product_id, quantity)
+    update_cart_item_quantity(cart_item["id"], quantity)
+
+    return {
+        "id": cart_item["id"],
+        "product_id": product_id,
+        "name": product["name"],
+        "quantity": quantity
+    }
