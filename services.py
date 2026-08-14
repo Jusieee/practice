@@ -65,7 +65,16 @@ def get_cart():
     for item in cart_items:
         item_total = item["price"] * item["quantity"]
         total += item_total
-        items.append(item)
+        items.append(
+            {
+                "id": item["id"],
+                "product_id": item["product_id"],
+                "product_name": item["name"],
+                "price": item["price"],
+                "quantity": item["quantity"],
+                "total_price": item_total
+            }
+        )
 
     return {
         "items": items,
