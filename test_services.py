@@ -196,12 +196,6 @@ def test_add_product_to_cart_not_found_item(monkeypatch):
         lambda product_id: None
     )
 
-    with pytest.raises(ProductNotFoundError):
-        add_product_to_cart(
-            product_id=999,
-            quantity=1
-        )
-
     def fail_if_called(*args, **kwargs):
         raise AssertionError(
             "Товара такого нету"
@@ -212,4 +206,8 @@ def test_add_product_to_cart_not_found_item(monkeypatch):
         fail_if_called
     )
 
-    assert None
+    with pytest.raises(ProductNotFoundError):
+        add_product_to_cart(
+            product_id=999,
+            quantity=1
+        )
