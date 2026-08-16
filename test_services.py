@@ -27,3 +27,5 @@ def test_get_cart_calculates_total(monkeypatch):
     result = get_cart()
 
     assert result["total"] == 5000
+    assert result["items"][0]["total_price"] == 2000
+    assert result["items"][1]["total_price"] == 3000
