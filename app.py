@@ -2,7 +2,15 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, status, Path
 
-from schemas import Product, CartItemCreate, CartItemUpdate, CartResponse, ProductCreate, ProductUpdate
+from schemas import (
+    Product,
+    CartItemActionResponse,
+    CartItemCreate,
+    CartItemUpdate,
+    CartResponse,
+    ProductCreate,
+    ProductUpdate,
+)
 
 from repositories import (
     create_product,
@@ -71,6 +79,7 @@ def create_product_endpoint(product: ProductCreate):
 @app.post(
     "/cart/items",
     status_code=status.HTTP_201_CREATED,
+    response_model=CartItemActionResponse
 )
 def add_to_cart(item: CartItemCreate):
 
@@ -202,7 +211,9 @@ def delete_cart_items_endpoint(product_id: int = Path(gt=0)):
         )
 
 
-@app.patch("/cart/items/{product_id}")
+@app.patch("/cart/items/{product_id}",
+           response_model=CartItemActionResponse
+           )
 def update_cart_item(
         item: CartItemUpdate,
         product_id: int = Path(gt=0)
