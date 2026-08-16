@@ -37,3 +37,15 @@ class ProductUpdate(BaseModel):
 
 class CartItemUpdate(BaseModel):
     quantity: int = Field(gt=0)
+
+class CartItemResponse(BaseModel):
+    id: int
+    product_id: int
+    product_name: str
+    price: float
+    quantity: int
+    total_price: float
+
+class CartResponse(BaseModel):
+    items: list[CartItemResponse]
+    total: float

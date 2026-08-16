@@ -2,7 +2,7 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, status, Path
 
-from schemas import Product, CartItemCreate, CartItemUpdate, ProductCreate, ProductUpdate
+from schemas import Product, CartItemCreate, CartItemUpdate, CartResponse, ProductCreate, ProductUpdate
 
 from repositories import (
     create_product,
@@ -170,7 +170,8 @@ def update_product(
             detail="Серверная ошибка"
         )
 
-@app.get("/cart")
+@app.get("/cart",
+         response_model=CartResponse)
 def get_cart_endpoint():
     try:
         return get_cart()
