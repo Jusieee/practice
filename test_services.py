@@ -128,3 +128,62 @@ def test_add_product_to_cart_creates_new_item(monkeypatch):
     assert result["product_id"] == 1
     assert result["product_name"] == "Мышь"
     assert result["quantity"] == 3
+
+
+def test_add_product_to_cart_updates_existing_item(monkeypatch):
+    fake_product = {
+        "id": 1,
+        "name": "Мышь",
+        "price": 1000,
+        "stock": 10
+    }
+
+    fake_cart_item = {
+        "id": 15,
+        "product_id": 1,
+        "quantity": 3
+    }
+
+    monkeypatch.setattr(
+        "services.get_product_by_id",
+        lambda product_id: fake_product
+    )
+
+    monkeypatch.setattr(
+        "services.get_cart_item_by_product_id",
+        lambda product_id: fake_cart_item
+    )
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "cart_item уже есть, создаться не должен"
+        )
+
+    monkeypatch.setattr(
+        "services.create_cart_item",
+        fail_if_called
+    )
+
+    updated_data = {}
+
+    def fake_update_cart_item_quantity(cart_item_id, quantity):
+        updated_data["cart_item_id"] = cart_item_id
+        updated_data["quantity"] = quantity
+
+    monkeypatch.setattr(
+        "services.update_cart_item_quantity",
+        fake_update_cart_item_quantity
+    )
+
+    result = add_product_to_cart(
+        product_id=1,
+        quantity=2
+    )
+
+    assert updated_data["cart_item_id"] == 15
+    assert updated_data["quantity"] == 5
+
+    assert result["id"] == 15
+    assert result["product_id"] == 1
+    assert result["product_name"] == "Мышь"
+    assert result["quantity"] == 5
