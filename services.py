@@ -95,12 +95,12 @@ def set_cart_item_quantity(
 ):
     product = get_product_by_id(product_id)
 
-    if not product:
+    if product is None:
         raise ProductNotFoundError
 
     cart_item = get_cart_item_by_product_id(product_id)
 
-    if not cart_item:
+    if cart_item is None:
         raise CartItemNotFoundError
 
     if quantity > product["stock"]:
