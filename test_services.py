@@ -67,12 +67,12 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
 
     monkeypatch.setattr(
         "services.create_cart_item",
-        fail_if_called()
+        fail_if_called
     )
 
     monkeypatch.setattr(
         "services.update_cart_item_quantity",
-        fail_if_called()
+        fail_if_called
     )
 
     with pytest.raises(InsufficientStockError) as error:
