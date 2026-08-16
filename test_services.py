@@ -6,6 +6,7 @@ from services import (
     get_cart,
 )
 
+
 def test_get_cart_calculates_total(monkeypatch):
     fake_cart_items = [
         {
@@ -82,3 +83,48 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
         )
 
     assert error.value.available == 5
+
+
+def test_add_product_to_cart_creates_new_item(monkeypatch):
+    fake_product = {
+        "id": 1,
+        "name": "Мышь",
+        "price": 1000,
+        "stock": 10
+    }
+
+    monkeypatch.setattr(
+        "services.get_product_by_id",
+        lambda product_id: fake_product
+    )
+
+    monkeypatch.setattr(
+        "services.get_cart_item_by_product_id",
+        lambda product_id: None
+    )
+
+    created_data = {}
+
+    def fake_create_cart_item(product_id, quantity):
+        created_data["product_id"] = product_id
+        created_data["quantity"] = quantity
+
+        return 15
+
+    monkeypatch.setattr(
+        "services.create_cart_item",
+        fake_create_cart_item,
+    )
+
+    result = add_product_to_cart(
+        product_id=1,
+        quantity=3
+    )
+
+    assert created_data["product_id"] == 1
+    assert created_data["quantity"] == 3
+
+    assert result["id"] == 15
+    assert result["product_id"] == 1
+    assert result["product_name"] == "Мышь"
+    assert result["quantity"] == 3
