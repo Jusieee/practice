@@ -2,7 +2,7 @@ import sqlite3
 
 from fastapi import FastAPI, HTTPException, status, Path
 
-from schemas import Product, CartItemCreate, ProductCreate, ProductUpdate
+from schemas import Product, CartItemCreate, CartItemUpdate, ProductCreate, ProductUpdate
 
 from repositories import (
     create_product,
@@ -19,6 +19,7 @@ from services import (
     InsufficientStockError,
     ProductNotFoundError,
     remove_product_from_cart,
+    set_cart_item_quantity
 )
 
 app = FastAPI()
@@ -191,6 +192,42 @@ def delete_cart_items_endpoint(product_id: int = Path(gt=0)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Товар не найден"
+        )
+
+    except sqlite3.Error:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Серверная ошибка"
+        )
+
+
+@app.patch("/cart/items/{product_id}")
+def update_cart_item(
+        item: CartItemUpdate,
+        product_id: int = Path(gt=0)
+):
+    try:
+        return set_cart_item_quantity(
+            product_id=product_id,
+            quantity=item.quantity
+        )
+
+    except ProductNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Товар не найден"
+        )
+
+    except CartItemNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Товара в корзине нету"
+        )
+
+    except InsufficientStockError as error:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Доступно только: {error.available} шт."
         )
 
     except sqlite3.Error:
