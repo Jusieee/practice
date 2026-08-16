@@ -2,6 +2,7 @@ import pytest
 
 from services import (
     InsufficientStockError,
+    ProductNotFoundError,
     add_product_to_cart,
     get_cart,
 )
@@ -187,3 +188,28 @@ def test_add_product_to_cart_updates_existing_item(monkeypatch):
     assert result["product_id"] == 1
     assert result["product_name"] == "Мышь"
     assert result["quantity"] == 5
+
+
+def test_add_product_to_cart_not_found_item(monkeypatch):
+    monkeypatch.setattr(
+        "services.get_product_by_id",
+        lambda product_id: None
+    )
+
+    with pytest.raises(ProductNotFoundError):
+        add_product_to_cart(
+            product_id=999,
+            quantity=1
+        )
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "Товара такого нету"
+        )
+
+    monkeypatch.setattr(
+        "services.get_cart_item_by_product_id",
+        fail_if_called
+    )
+
+    assert None
