@@ -60,6 +60,21 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
         lambda product_id: fake_cart_item
     )
 
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "Функция изменения корзины не должна вызываться"
+        )
+
+    monkeypatch.setattr(
+        "services.create_cart_item",
+        fail_if_called()
+    )
+
+    monkeypatch.setattr(
+        "services.update_cart_item_quantity",
+        fail_if_called()
+    )
+
     with pytest.raises(InsufficientStockError) as error:
         add_product_to_cart(
             product_id=1,
