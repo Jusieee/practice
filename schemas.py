@@ -27,6 +27,7 @@ class CartItemCreate(BaseModel):
         description="Количество товара",
     )
 
+
 class ProductUpdate(BaseModel):
     name: str = Field(
         min_length=1,
@@ -35,8 +36,10 @@ class ProductUpdate(BaseModel):
     price: float = Field(gt=0)
     stock: int = Field(ge=0)
 
+
 class CartItemUpdate(BaseModel):
     quantity: int = Field(gt=0)
+
 
 class CartItemResponse(BaseModel):
     id: int
@@ -45,6 +48,7 @@ class CartItemResponse(BaseModel):
     price: float
     quantity: int
     total_price: float
+
 
 class CartResponse(BaseModel):
     items: list[CartItemResponse]
