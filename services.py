@@ -111,6 +111,6 @@ def set_cart_item_quantity(
     return {
         "id": cart_item["id"],
         "product_id": product_id,
-        "name": product["name"],
+        "product_name": product["name"],
         "quantity": quantity
     }
