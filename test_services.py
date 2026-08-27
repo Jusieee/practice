@@ -1,11 +1,11 @@
 import pytest
 
-from app import update_product
 from services import (
     InsufficientStockError,
     ProductNotFoundError,
     add_product_to_cart,
     get_cart,
+    set_cart_item_quantity
 )
 
 
@@ -237,16 +237,6 @@ def test_update_set_cart_item_quantity(monkeypatch):
         lambda product_id: fake_cart_item
     )
 
-    def fail_if_called(*args, **kwargs):
-        raise AssertionError(
-            "Корзина не должна создаваться"
-        )
-
-    monkeypatch.setattr(
-        "services.create_cart_item",
-        fail_if_called
-    )
-
     updated_data = {}
 
     def fake_update_cart_item_quantity(cart_item_id, quantity):
@@ -258,7 +248,7 @@ def test_update_set_cart_item_quantity(monkeypatch):
         fake_update_cart_item_quantity
     )
 
-    result = add_product_to_cart(
+    result = set_cart_item_quantity(
         product_id=1,
         quantity=4
     )
@@ -269,4 +259,4 @@ def test_update_set_cart_item_quantity(monkeypatch):
     assert result["id"] == 15
     assert result["product_id"] == 1
     assert result["product_name"] == "Мышь"
-    assert result["quantity"] == 6
+    assert result["quantity"] == 4
