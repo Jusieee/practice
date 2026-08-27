@@ -213,6 +213,7 @@ def test_add_product_to_cart_not_found_item(monkeypatch):
             quantity=1
         )
 
+
 def test_update_set_cart_item_quantity(monkeypatch):
     fake_product = {
         "id": 1,
@@ -261,7 +262,8 @@ def test_update_set_cart_item_quantity(monkeypatch):
     assert result["product_name"] == "Мышь"
     assert result["quantity"] == 4
 
-def test_fail_update_set_cart_item_quantity(monkeypatch):
+
+def test_set_cart_item_quantity_not_enough_stock(monkeypatch):
     fake_product = {
         "id": 1,
         "name": "Мышь",
@@ -285,14 +287,14 @@ def test_fail_update_set_cart_item_quantity(monkeypatch):
         lambda product_id: fake_cart_item
     )
 
-    def fail_by_called(*args, **kwargs):
+    def fail_if_called(*args, **kwargs):
         raise AssertionError(
             "Update не должен проходить"
         )
 
     monkeypatch.setattr(
         "services.update_cart_item_quantity",
-        fail_by_called
+        fail_if_called
     )
 
     with pytest.raises(InsufficientStockError) as error:
