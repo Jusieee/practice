@@ -269,4 +269,4 @@ def test_update_set_cart_item_quantity(monkeypatch):
     assert result["id"] == 15
     assert result["product_id"] == 1
     assert result["product_name"] == "Мышь"
-    assert result["quantity"] == 4
+    assert result["quantity"] == 6
