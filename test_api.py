@@ -9,7 +9,7 @@ def test_home():
 
     assert response.status_code == 200
     assert response.json() == {
-        "massage": "Добро пожаловать в API нашего интернет-магазина!"
+        "message": "Добро пожаловать в API нашего интернет-магазина!"
     }
 
 def test_get_product_invalid_id():
