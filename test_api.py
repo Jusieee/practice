@@ -48,3 +48,16 @@ def test_get_product_success(monkeypatch):
         "price": 1000,
         "stock": 5
     }
+
+def test_get_product_not_found(monkeypatch):
+    monkeypatch.setattr(
+        "app.get_product_by_id",
+        lambda product_id: None
+    )
+
+    response = client.get("/products/999")
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Товар не найден"
+    }
