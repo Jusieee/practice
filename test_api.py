@@ -99,7 +99,7 @@ def test_create_product_success(monkeypatch):
     }
 
 
-def test_created_product_duplicate(monkeypatch):
+def test_create_product_duplicate(monkeypatch):
     def fake_create_product(name, price, stock):
         raise sqlite3.IntegrityError
 
@@ -123,3 +123,15 @@ def test_created_product_duplicate(monkeypatch):
         "detail": "Такой товар уже есть"
     }
 
+
+def test_create_product_invalid_price():
+    response = client.post(
+        "/products",
+        json={
+            "name": "Монитор",
+            "price": -100,
+            "stock": 4
+        }
+    )
+
+    assert response.status_code == 422
