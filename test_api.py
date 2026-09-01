@@ -2,6 +2,8 @@ from fastapi.testclient import TestClient
 
 from app import app
 
+import sqlite3
+
 
 client = TestClient(app)
 
@@ -95,3 +97,29 @@ def test_create_product_success(monkeypatch):
         "price": 25000,
         "stock": 4
     }
+
+
+def test_created_product_duplicate(monkeypatch):
+    def fake_create_product(name, price, stock):
+        raise sqlite3.IntegrityError
+
+    monkeypatch.setattr(
+        "app.create_product",
+        fake_create_product
+    )
+
+    response = client.post(
+        "/products",
+        json={
+            "name": "Монитор",
+            "price": 25000,
+            "stock": 4
+        }
+    )
+
+    assert response.status_code == 409
+
+    assert response.json() == {
+        "detail": "Такой товар уже есть"
+    }
+
