@@ -124,7 +124,17 @@ def test_create_product_duplicate(monkeypatch):
     }
 
 
-def test_create_product_invalid_price():
+def test_create_product_invalid_price(monkeypatch):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "created_product не должен вызываться при ошибке валидации"
+        )
+
+    monkeypatch.setattr(
+        "app.create_product",
+        fail_if_called
+    )
+
     response = client.post(
         "/products",
         json={
