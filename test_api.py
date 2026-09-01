@@ -4,6 +4,8 @@ from app import app
 
 import sqlite3
 
+from services import ProductNotFoundError
+
 
 client = TestClient(app)
 
@@ -176,3 +178,28 @@ def test_add_product_to_cart_success(monkeypatch):
         "product_name": "Мышь",
         "quantity": 3
     }
+
+
+def test_add_product_to_cart_product_not_found(monkeypatch):
+    def fake_add_product_to_cart(product_id, quantity):
+        raise ProductNotFoundError
+
+    monkeypatch.setattr(
+        "app.add_product_to_cart",
+        fake_add_product_to_cart
+    )
+
+    response = client.post(
+        "/cart/items",
+        json={
+            "product_id": 999,
+            "quantity": 1
+        }
+    )
+
+    assert response.status_code == 404
+
+    assert response.json() == {
+        "detail": "Товар не найден"
+    }
+
