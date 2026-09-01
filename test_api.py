@@ -145,3 +145,34 @@ def test_create_product_invalid_price(monkeypatch):
     )
 
     assert response.status_code == 422
+
+
+def test_add_product_to_cart_success(monkeypatch):
+    fake_cart_item = {
+        "id": 10,
+        "product_id": 1,
+        "product_name": "Мышь",
+        "quantity": 3
+    }
+
+    monkeypatch.setattr(
+        "app.add_product_to_cart",
+        lambda product_id, quantity: fake_cart_item
+    )
+
+    response = client.post(
+        "/cart/items",
+        json={
+            "product_id": 1,
+            "quantity": 3
+        }
+    )
+
+    assert response.status_code == 201
+
+    assert response.json() == {
+        "id": 10,
+        "product_id": 1,
+        "product_name": "Мышь",
+        "quantity": 3
+    }
