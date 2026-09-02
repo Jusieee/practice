@@ -320,3 +320,26 @@ def test_set_cart_item_quantity_cart_item_not_found(monkeypatch):
     assert response.json() == {
         "detail": "Товара в корзине нету"
     }
+
+
+def test_set_cart_item_quantity_not_enough_stock(monkeypatch):
+    def fake_cart_item_quantity(product_id,quantity):
+        raise InsufficientStockError(5)
+
+    monkeypatch.setattr(
+        "app.set_cart_item_quantity",
+        fake_cart_item_quantity
+    )
+
+    response = client.patch(
+        "/cart/items/1",
+        json={
+            "quantity": 10
+        }
+    )
+
+    assert response.status_code == 409
+
+    assert response.json() == {
+        "detail": "Доступно только: 5 шт."
+    }
