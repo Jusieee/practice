@@ -377,3 +377,16 @@ def test_delete_cart_item_success(monkeypatch):
     assert response.status_code == 204
 
     assert response.content == b""
+
+
+def test_delete_cart_item_not_found(monkeypatch):
+    def fake_remove_product_from_cart(*args, **kwargs):
+        raise ProductNotFoundError
+
+    response = client.delete("/cart/items/1")
+
+    assert response.status_code == 404
+
+    assert response.json() == {
+        "detail": "Товар не найден"
+    }
