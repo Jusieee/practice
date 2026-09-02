@@ -381,7 +381,12 @@ def test_delete_cart_item_success(monkeypatch):
 
 def test_delete_cart_item_not_found(monkeypatch):
     def fake_remove_product_from_cart(*args, **kwargs):
-        raise ProductNotFoundError
+        raise CartItemNotFoundError
+
+    monkeypatch.setattr(
+        "app.remove_product_from_cart",
+        fake_remove_product_from_cart
+    )
 
     response = client.delete("/cart/items/999")
 
