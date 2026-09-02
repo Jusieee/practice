@@ -87,13 +87,7 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
     assert error.value.available == 5
 
 
-def test_add_product_to_cart_creates_new_item(monkeypatch):
-    fake_product = {
-        "id": 1,
-        "name": "Мышь",
-        "price": 1000,
-        "stock": 10
-    }
+def test_add_product_to_cart_creates_new_item(monkeypatch, fake_product):
 
     monkeypatch.setattr(
         "services.get_product_by_id",
