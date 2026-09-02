@@ -278,3 +278,22 @@ def test_set_cart_item_quantity_success(monkeypatch):
         "product_name": "Мышь",
         "quantity": 4
     }
+
+
+def test_set_cart_item_quantity_product_not_found(monkeypatch):
+    def fake_set_cart_item_quantity(product_id, quantity):
+        raise ProductNotFoundError
+
+    monkeypatch.setattr(
+        "app.set_cart_item_quantity",
+        fake_set_cart_item_quantity
+    )
+
+    response = client.patch(
+        "/cart/items/999",
+        json={
+            "quantity": 3
+        }
+    )
+
+    assert response.status_code == 404
