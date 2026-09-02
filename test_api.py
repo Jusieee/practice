@@ -343,3 +343,25 @@ def test_set_cart_item_quantity_not_enough_stock(monkeypatch):
     assert response.json() == {
         "detail": "Доступно только: 5 шт."
     }
+
+
+def test_set_cart_item_quantity_invalid_quantity(monkeypatch):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "Функция не должна запускаться"
+        )
+
+    monkeypatch.setattr(
+        "app.set_cart_item_quantity",
+        fail_if_called
+    )
+
+    response = client.patch(
+        "/cart/items/1",
+        json={
+            "quantity": 0
+        }
+    )
+
+    assert response.status_code == 422
+
