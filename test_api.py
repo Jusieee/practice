@@ -309,7 +309,7 @@ def test_set_cart_item_quantity_cart_item_not_found(monkeypatch):
     )
 
     response = client.patch(
-        "/cart/item/1",
+        "/cart/items/1",
         json={
             "quantity": 3
         }
