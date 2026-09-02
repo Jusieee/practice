@@ -4,7 +4,7 @@ from app import app
 
 import sqlite3
 
-from services import InsufficientStockError ,ProductNotFoundError
+from services import CartItemNotFoundError, InsufficientStockError ,ProductNotFoundError
 
 
 client = TestClient(app)
@@ -297,3 +297,26 @@ def test_set_cart_item_quantity_product_not_found(monkeypatch):
     )
 
     assert response.status_code == 404
+
+
+def test_set_cart_item_quantity_cart_item_not_found(monkeypatch):
+    def fake_set_cart_item_quantity(product_id, quantity):
+        raise CartItemNotFoundError
+
+    monkeypatch.setattr(
+        "app.set_cart_item_quantity",
+        fake_set_cart_item_quantity
+    )
+
+    response = client.patch(
+        "/cart/item/1",
+        json={
+            "quantity": 3
+        }
+    )
+
+    assert response.status_code == 404
+
+    assert response.json() == {
+        "detail": "Товара в корзине нету"
+    }
