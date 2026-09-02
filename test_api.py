@@ -365,3 +365,15 @@ def test_set_cart_item_quantity_invalid_quantity(monkeypatch):
 
     assert response.status_code == 422
 
+
+def test_delete_cart_item_success(monkeypatch):
+    monkeypatch.setattr(
+        "app.remove_product_from_cart",
+        lambda product_id: None
+    )
+
+    response = client.delete("/cart/items/1")
+
+    assert response.status_code == 204
+
+    assert response.content == b""
