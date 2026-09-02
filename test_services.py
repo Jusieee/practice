@@ -126,19 +126,12 @@ def test_add_product_to_cart_creates_new_item(monkeypatch, fake_product):
     assert result["quantity"] == 3
 
 
-def test_add_product_to_cart_updates_existing_item(monkeypatch):
-    fake_product = {
-        "id": 1,
-        "name": "Мышь",
-        "price": 1000,
-        "stock": 10
-    }
+def test_add_product_to_cart_updates_existing_item(
+        monkeypatch,
+        fake_product,
+        fake_cart_item
+):
 
-    fake_cart_item = {
-        "id": 15,
-        "product_id": 1,
-        "quantity": 3
-    }
 
     monkeypatch.setattr(
         "services.get_product_by_id",
