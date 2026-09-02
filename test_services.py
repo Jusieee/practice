@@ -250,20 +250,11 @@ def test_update_set_cart_item_quantity(monkeypatch):
     assert result["quantity"] == 4
 
 
-def test_set_cart_item_quantity_not_enough_stock(monkeypatch):
-    fake_product = {
-        "id": 1,
-        "name": "Мышь",
-        "price": 1000,
-        "stock": 10
-    }
-
-    fake_cart_item = {
-        "id": 15,
-        "product_id": 1,
-        "quantity": 3
-    }
-
+def test_set_cart_item_quantity_not_enough_stock(
+        monkeypatch,
+        fake_product,
+        fake_cart_item
+):
     monkeypatch.setattr(
         "services.get_product_by_id",
         lambda product_id: fake_product
