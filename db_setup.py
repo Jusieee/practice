@@ -23,24 +23,6 @@ quantity INTEGER DEFAULT 0
 
 cursor.execute(
     """
-    SELECT product_id, COUNT(*)
-    FROM cart_items
-    GROUP BY product_id
-    HAVING COUNT(*) > 1
-    """
-)
-
-dublicates = cursor.fetchall()
-# print(dublicates)
-
-cursor.execute(
-    """
-    DELETE FROM cart_items
-    """
-)
-
-cursor.execute(
-    """
     CREATE UNIQUE INDEX IF NOT EXISTS idx_cart_items_product_id
     ON cart_items(product_id)
     """
