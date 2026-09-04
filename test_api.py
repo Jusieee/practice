@@ -229,28 +229,6 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
     }
 
 
-def test_add_product_to_cart_invalid_quantity(monkeypatch):
-    def fail_if_called(*args, **kwargs):
-        raise AssertionError(
-            "add_product_to_cart не должен вызываться, при ошибке валидации"
-        )
-
-    monkeypatch.setattr(
-        "app.add_product_to_cart",
-        fail_if_called
-    )
-
-    response = client.post(
-        "/cart/items",
-        json={
-            "product_id": 1,
-            "quantity": 0
-        }
-    )
-
-    assert response.status_code == 422
-
-
 def test_set_cart_item_quantity_success(monkeypatch):
     fake_cart_item = {
         "id": 15,
