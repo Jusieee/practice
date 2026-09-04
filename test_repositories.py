@@ -136,3 +136,22 @@ def test_create_and_get_cart_item(test_db):
     assert cart_item["id"] == cart_item_id
     assert cart_item["product_id"] == product["id"]
     assert cart_item["quantity"] == 3
+
+
+def test_create_dublicate_cart_item(test_db):
+    product = create_product(
+        name="Мышь",
+        price=1000,
+        stock=10
+    )
+
+    create_cart_item(
+        product_id=product["id"],
+        quantity=2
+    )
+
+    with pytest.raises(sqlite3.IntegrityError):
+        create_cart_item(
+            product_id=product["id"],
+            quantity=5
+        )
