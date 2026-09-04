@@ -6,6 +6,7 @@ import sqlite3
 
 from services import CartItemNotFoundError, InsufficientStockError ,ProductNotFoundError
 
+import pytest
 
 client = TestClient(app)
 
@@ -395,3 +396,32 @@ def test_delete_cart_item_not_found(monkeypatch):
     assert response.json() == {
         "detail": "Товар не найден"
     }
+
+
+@pytest.mark.parametrize(
+    "quantity",
+    [0, -1, -10]
+)
+def test_add_product_to_cart_invalid_quantity(
+        monkeypatch,
+        quantity
+):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "add_product не должен запускаться"
+        )
+
+    monkeypatch.setattr(
+        "app.add_product_to_cart",
+        fail_if_called
+    )
+
+    response = client.post(
+        "/cart/items",
+        json={
+            "product_id": 1,
+            "quantity": quantity
+        }
+    )
+
+    assert response.status_code == 422
