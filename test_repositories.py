@@ -86,3 +86,31 @@ def test_update_product_not_found(test_db):
     )
 
     assert result is None
+
+
+def test_update_product_bot_found(test_db):
+    first_product = create_product(
+        name="Монитор",
+        price=25000,
+        stock=4
+    )
+
+    second_product = create_product(
+        name="Клавиатура",
+        price=5000,
+        stock=10
+    )
+
+    with pytest.raises(sqlite3.IntegrityError):
+        update_product_by_id(
+            product_id=second_product["id"],
+            name=" МоНиТор  ",
+            price=7000,
+            stock=15
+        )
+
+    product_from_db = get_product_by_id(second_product["id"])
+
+    assert product_from_db["name"] == "Клавиатура"
+    assert product_from_db["price"] == 5000
+    assert product_from_db["stock"] == 10
