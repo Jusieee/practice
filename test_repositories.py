@@ -1,8 +1,10 @@
 from repositories import (
     create_product,
     create_cart_item,
+    delete_cart_item_by_product_id,
     get_cart_item_by_product_id,
     get_product_by_id,
+    update_cart_item_quantity,
     update_product_by_id
 )
 
@@ -159,3 +161,29 @@ def test_create_dublicate_cart_item(test_db):
     cart_item = get_cart_item_by_product_id(product["id"])
 
     assert cart_item["quantity"] == 2
+
+
+def test_update_cart_item_quantity(test_db):
+    product = create_product(
+        name="Мышь",
+        price=1000,
+        stock=10
+    )
+
+    cart_item_id = create_cart_item(
+        product_id=product["id"],
+        quantity=2
+    )
+
+    result = update_cart_item_quantity(
+        cart_item_id=cart_item_id,
+        quantity=7
+    )
+
+    cart_item = get_cart_item_by_product_id(
+        product["id"]
+    )
+
+    assert result == cart_item_id
+
+    assert cart_item["quantity"] == 7
