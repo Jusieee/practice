@@ -41,7 +41,7 @@ def test_db(monkeypatch, tmp_path):
             name TEXT NOT NULL,
             price REAL NOT NULL,
             stock INTEGER DEFAULT 0,
-            name_key TEXT NOT NULL UNIQUE,
+            name_key TEXT NOT NULL UNIQUE
             )
     """
     )
@@ -51,7 +51,7 @@ def test_db(monkeypatch, tmp_path):
         CREATE TABLE cart_items(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             product_id INTEGER,
-            quantity INTEGER DEFAULT 0,
+            quantity INTEGER DEFAULT 0
             )
         """
     )
