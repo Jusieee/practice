@@ -155,3 +155,7 @@ def test_create_dublicate_cart_item(test_db):
             product_id=product["id"],
             quantity=5
         )
+
+    cart_item = get_cart_item_by_product_id(product["id"])
+
+    assert cart_item["quantity"] == 2
