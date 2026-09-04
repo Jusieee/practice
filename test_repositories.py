@@ -1,6 +1,7 @@
 from repositories import (
     create_product,
-    get_product_by_id
+    get_product_by_id,
+    update_product_by_id
 )
 
 import pytest
@@ -46,3 +47,31 @@ def test_create_product_dublicate_name(test_db):
     assert product["name"] == "Монитор"
     assert product["price"] == 25000
     assert product["stock"] == 4
+
+
+def test_update_product_success(test_db):
+    created_product = create_product(
+        name="Монитор",
+        price=25000,
+        stock=4
+    )
+
+    updated_product = update_product_by_id(
+        product_id=created_product["id"],
+        name="Игровой монитор",
+        price=30000,
+        stock=7
+    )
+
+    product_from_db = get_product_by_id(created_product["id"])
+
+    assert updated_product == {
+        "id": updated_product["id"],
+        "name": "Игровой монитор",
+        "price": 30000,
+        "stock": 7
+    }
+
+    assert product_from_db["name"] == "Игровой монитор"
+    assert product_from_db["price"] == 30000
+    assert product_from_db["stock"] == 7
