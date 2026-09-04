@@ -1,5 +1,7 @@
 from repositories import (
     create_product,
+    create_cart_item,
+    get_cart_item_by_product_id,
     get_product_by_id,
     update_product_by_id
 )
@@ -88,7 +90,7 @@ def test_update_product_not_found(test_db):
     assert result is None
 
 
-def test_update_product_bot_found(test_db):
+def test_update_product_dublicate_name(test_db):
     first_product = create_product(
         name="Монитор",
         price=25000,
@@ -114,3 +116,23 @@ def test_update_product_bot_found(test_db):
     assert product_from_db["name"] == "Клавиатура"
     assert product_from_db["price"] == 5000
     assert product_from_db["stock"] == 10
+
+
+def test_create_and_get_cart_item(test_db):
+    product = create_product(
+        name="Мышь",
+        price=1000,
+        stock=10
+    )
+
+    cart_item_id = create_cart_item(
+        product_id=product["id"],
+        quantity=3
+    )
+
+    cart_item = get_cart_item_by_product_id(product["id"])
+
+    assert cart_item is not None
+    assert cart_item["id"] == cart_item_id
+    assert cart_item["product_id"] == product["id"]
+    assert cart_item["quantity"] == 3
