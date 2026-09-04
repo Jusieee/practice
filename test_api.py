@@ -127,29 +127,6 @@ def test_create_product_duplicate(monkeypatch):
     }
 
 
-def test_create_product_invalid_price(monkeypatch):
-    def fail_if_called(*args, **kwargs):
-        raise AssertionError(
-            "created_product не должен вызываться при ошибке валидации"
-        )
-
-    monkeypatch.setattr(
-        "app.create_product",
-        fail_if_called
-    )
-
-    response = client.post(
-        "/products",
-        json={
-            "name": "Монитор",
-            "price": -100,
-            "stock": 4
-        }
-    )
-
-    assert response.status_code == 422
-
-
 def test_add_product_to_cart_success(monkeypatch):
     fake_cart_item = {
         "id": 10,
@@ -399,6 +376,42 @@ def test_add_product_to_cart_invalid_quantity(
         json={
             "product_id": 1,
             "quantity": quantity
+        }
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize(
+    "price, stock",
+    [
+        (0, 4),
+        (-1, 4),
+        (1000, -1),
+        (-100, 5)
+    ]
+)
+def test_create_product_invalid_data(
+    monkeypatch,
+    price,
+    stock
+):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "Create_product не должен запускаться"
+        )
+
+    monkeypatch.setattr(
+        "app.create_product",
+        fail_if_called
+    )
+
+    response = client.post(
+        "/products",
+        json={
+            "name": "Монитор",
+            "price": price,
+            "stock": stock
         }
     )
 
