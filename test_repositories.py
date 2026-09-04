@@ -75,3 +75,14 @@ def test_update_product_success(test_db):
     assert product_from_db["name"] == "Игровой монитор"
     assert product_from_db["price"] == 30000
     assert product_from_db["stock"] == 7
+
+
+def test_update_product_not_found(test_db):
+    result = update_product_by_id(
+        product_id=999,
+        name="Монитор",
+        price=25000,
+        stock=4
+    )
+
+    assert result is None
