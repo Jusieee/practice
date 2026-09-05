@@ -211,3 +211,9 @@ def test_delete_cart_item_success(test_db):
 
     assert result is True
     assert cart_item is None
+
+
+def test_delete_cart_item_not_found(test_db):
+    result = delete_cart_item_by_product_id(999)
+
+    assert result is False
