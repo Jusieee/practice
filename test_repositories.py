@@ -187,3 +187,27 @@ def test_update_cart_item_quantity(test_db):
     assert result == cart_item_id
 
     assert cart_item["quantity"] == 7
+
+
+def test_delete_cart_item_success(test_db):
+    product = create_product(
+        name="Мышь",
+        price=1000,
+        stock=10
+    )
+
+    create_cart_item(
+        product_id=product["id"],
+        quantity=3
+    )
+
+    result = delete_cart_item_by_product_id(
+        product_id=product["id"]
+    )
+
+    cart_item = get_cart_item_by_product_id(
+        product_id=product["id"]
+    )
+
+    assert result is True
+    assert cart_item is None
