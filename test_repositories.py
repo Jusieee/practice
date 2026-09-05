@@ -3,6 +3,7 @@ from repositories import (
     create_cart_item,
     delete_cart_item_by_product_id,
     get_cart_item_by_product_id,
+    get_cart_items,
     get_product_by_id,
     update_cart_item_quantity,
     update_product_by_id
@@ -217,3 +218,43 @@ def test_delete_cart_item_not_found(test_db):
     result = delete_cart_item_by_product_id(999)
 
     assert result is False
+
+
+def test_get_cart_item_with_join(test_db):
+    first_product = create_product(
+        name="Мышь",
+        price=1000,
+        stock=10
+    )
+
+    second_product = create_product(
+        name="Клавиатура",
+        price=5000,
+        stock=7
+    )
+
+    first_cart_item_id = create_cart_item(
+        product_id=first_product["id"],
+        quantity=2
+    )
+
+    second_cart_item_id = create_cart_item(
+        product_id=second_product["id"],
+        quantity=3
+    )
+
+    cart_items = get_cart_items()
+
+    assert len(cart_items) == 2
+
+    assert cart_items[0]["id"] == first_cart_item_id
+    assert cart_items[0]["product_id"] == first_product["id"]
+    assert cart_items[0]["name"] == "Мышь"
+    assert cart_items[0]["price"] == 1000
+    assert cart_items[0]["quantity"] == 2
+
+    assert cart_items[1]["id"] == second_cart_item_id
+    assert cart_items[1]["product_id"] == second_product["id"]
+    assert cart_items[1]["name"] == "Клавиатура"
+    assert cart_items[1]["price"] == 5000
+    assert cart_items[1]["quantity"] == 3
