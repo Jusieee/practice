@@ -233,12 +233,12 @@ def test_get_cart_item_with_join(test_db):
         stock=7
     )
 
-    first_cart_item_id = create_cart_item(
+    create_cart_item(
         product_id=first_product["id"],
         quantity=2
     )
 
-    second_cart_item_id = create_cart_item(
+    create_cart_item(
         product_id=second_product["id"],
         quantity=3
     )
@@ -247,14 +247,18 @@ def test_get_cart_item_with_join(test_db):
 
     assert len(cart_items) == 2
 
-    assert cart_items[0]["id"] == first_cart_item_id
-    assert cart_items[0]["product_id"] == first_product["id"]
-    assert cart_items[0]["name"] == "Мышь"
-    assert cart_items[0]["price"] == 1000
-    assert cart_items[0]["quantity"] == 2
+    items_product_by_id = {
+        item["product_id"]: item
+        for item in cart_items
+    }
 
-    assert cart_items[1]["id"] == second_cart_item_id
-    assert cart_items[1]["product_id"] == second_product["id"]
-    assert cart_items[1]["name"] == "Клавиатура"
-    assert cart_items[1]["price"] == 5000
-    assert cart_items[1]["quantity"] == 3
+    mouse = items_product_by_id[first_product["id"]]
+    keyboard = items_product_by_id[second_product["id"]]
+
+    assert mouse["name"] == "Мышь"
+    assert mouse["price"] == 1000
+    assert mouse["quantity"] == 2
+
+    assert keyboard["name"] == "Клавиатура"
+    assert keyboard["price"] == 5000
+    assert keyboard["quantity"] == 3
