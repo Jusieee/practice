@@ -23,22 +23,19 @@ def get_product_by_id(product_id: int):
         connection.close()
 
 
-def get_all_products():
-    connection = get_connection()
+def get_all_products(
+    connection: sqlite3.Connection
+):
     cursor = connection.cursor()
 
-    try:
-        cursor.execute(
-            """
-            SELECT id, name, price, stock
-            FROM product
-            """
-        )
+    cursor.execute(
+        """
+        SELECT id, name, price, stock
+        FROM product
+        """
+    )
 
-        return cursor.fetchall()
-
-    finally:
-        connection.close()
+    return cursor.fetchall()
 
 
 def delete_product_by_id(product_id: int) -> bool:

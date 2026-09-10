@@ -40,8 +40,11 @@ def home():
     return {"message": "Добро пожаловать в API нашего интернет-магазина!"}
 
 @app.get("/products", response_model=list[Product])
-def get_products():
-    products = get_all_products()
+def get_products(
+        connection: sqlite3.Connection = Depends(get_db)
+):
+    products = get_all_products(connection)
+
     return [
         {
             "id": product["id"],
