@@ -262,3 +262,9 @@ def test_get_cart_item_with_join(test_db):
     assert keyboard["name"] == "Клавиатура"
     assert keyboard["price"] == 5000
     assert keyboard["quantity"] == 3
+
+
+def test_get_cart_items_empty(test_db):
+    cart_items = get_cart_items()
+
+    assert cart_items == []
