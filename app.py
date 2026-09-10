@@ -279,11 +279,11 @@ def depends_limit(
     }
 
 
-@app.get("depends-db")
+@app.get("/depends-db")
 def depends_db(
         connection: sqlite3.Connection = Depends(get_db)
 ):
-    print("3. Endpoint работает")
+    print("2. Endpoint работает")
 
     connection.execute("SELECT 1")
 
