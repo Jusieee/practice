@@ -1,6 +1,6 @@
 import sqlite3
 
-from fastapi import Depends, FastAPI, HTTPException, status, Path
+from fastapi import Depends, FastAPI, HTTPException, status, Path, Query
 
 from schemas import (
     Product,
@@ -259,4 +259,18 @@ def depends_demo(
 ):
     return {
         "message": message
+    }
+
+
+def get_limit(
+        limit: int = Query(default=10, ge=1, le=100)
+):
+    return limit
+
+@app.get("/depends-limit")
+def depends_limit(
+        limit: int = Depends(get_limit)
+):
+    return {
+        "limit": limit
     }
