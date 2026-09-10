@@ -1,6 +1,6 @@
 import sqlite3
 
-from fastapi import FastAPI, HTTPException, status, Path
+from fastapi import Depends, FastAPI, HTTPException, status, Path
 
 from schemas import (
     Product,
@@ -247,3 +247,16 @@ def update_cart_item(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
+
+
+def get_test_dependency():
+    return "Зависимость сработала"
+
+
+@app.get("/depends-demo")
+def depends_demo(
+        message: str = Depends(get_test_dependency)
+):
+    return {
+        "message": message
+    }
