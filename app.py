@@ -30,6 +30,9 @@ from services import (
     set_cart_item_quantity
 )
 
+from database import get_db
+
+
 app = FastAPI()
 
 @app.get("/")
@@ -273,4 +276,17 @@ def depends_limit(
 ):
     return {
         "limit": limit
+    }
+
+
+@app.get("depends-db")
+def depends_db(
+        connection: sqlite3.Connection = Depends(get_db)
+):
+    print("3. Endpoint работает")
+
+    connection.execute("SELECT 1")
+
+    return {
+        "message": "Соединение с БД получено"
     }
