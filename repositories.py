@@ -1,296 +1,180 @@
 import sqlite3
 
-from database import get_connection
+
+def get_product_by_id(connection: sqlite3.Connection, product_id: int):
+    cursor = connection.execute(
+        """
+        SELECT id, name, price, stock
+        FROM product
+        WHERE id = ?
+        """,
+        (product_id,),
+    )
+    return cursor.fetchone()
 
 
-def get_product_by_id(product_id: int):
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            SELECT id, name, price, stock
-            FROM product
-            WHERE id = ?
-            """,
-            (product_id,),
-        )
-
-        return cursor.fetchone()
-
-    finally:
-        connection.close()
-
-
-def get_all_products(
-    connection: sqlite3.Connection
-):
-    cursor = connection.cursor()
-
-    cursor.execute(
+def get_all_products(connection: sqlite3.Connection):
+    cursor = connection.execute(
         """
         SELECT id, name, price, stock
         FROM product
         """
     )
-
     return cursor.fetchall()
 
 
-def delete_product_by_id(product_id: int) -> bool:
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            DELETE FROM product
-            WHERE id = ?
-            """,
-            (product_id,)
-        )
-
-        connection.commit()
-
-        return cursor.rowcount > 0
-
-    except sqlite3.Error:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+def delete_product_by_id(connection: sqlite3.Connection, product_id: int) -> bool:
+    cursor = connection.execute(
+        """
+        DELETE FROM product
+        WHERE id = ?
+        """,
+        (product_id,)
+    )
+    return cursor.rowcount > 0
 
 
 def update_product_by_id(
+        connection: sqlite3.Connection,
         product_id: int,
         name: str,
         price: float,
         stock: int
 ):
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            SELECT id
-            FROM product
-            WHERE id = ?
-            """,
-            (product_id,)
-        )
-
-        existing_product = cursor.fetchone()
-
-        if existing_product is None:
-            return None
-
-        product_name = name.strip()
-        product_name_key = product_name.casefold()
-
-        cursor.execute(
-            """
-            UPDATE product
-            SET name = ?,
-                price = ?,
-                stock = ?,
-                name_key = ?
-            WHERE id = ?
-            """,
-            (
-                product_name,
-                price,
-                stock,
-                product_name_key,
-                product_id,
-            ),
-        )
-
-        connection.commit()
-
-        return {
-            "id": product_id,
-            "name": product_name,
-            "price": price,
-            "stock": stock
-        }
-
-    except sqlite3.Error:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+    cursor = connection.execute(
+        """
+        SELECT id
+        FROM product
+        WHERE id = ?
+        """,
+        (product_id,)
+    )
+    existing_product = cursor.fetchone()
+    if existing_product is None:
+        return None
+    product_name = name.strip()
+    product_name_key = product_name.casefold()
+    cursor.execute(
+        """
+        UPDATE product
+        SET name = ?,
+            price = ?,
+            stock = ?,
+            name_key = ?
+        WHERE id = ?
+        """,
+    (
+            product_name,
+            price,
+            stock,
+            product_name_key,
+            product_id,
+        ),
+    )
+    return {
+        "id": product_id,
+        "name": product_name,
+        "price": price,
+        "stock": stock
+    }
 
 
 def create_product(
+        connection: sqlite3.Connection,
         name: str,
         price: float,
         stock: int
 ):
-    connection = get_connection()
+
     cursor = connection.cursor()
-
-    try:
-        product_name = name.strip()
-        product_name_key = product_name.casefold()
-
-        cursor.execute(
-            """
-            INSERT INTO product (
-                name,
-                price,
-                stock,
-                name_key
-            )
-            VALUES (?, ?, ?, ?)
-            """,
-            (product_name, price, stock, product_name_key)
+    product_name = name.strip()
+    product_name_key = product_name.casefold()
+    cursor.execute(
+        """
+        INSERT INTO product (
+            name,
+            price,
+            stock,
+            name_key
         )
-
-        connection.commit()
-
-        return {
-            "id": cursor.lastrowid,
-            "name": product_name,
-            "price": price,
-            "stock": stock
-        }
-
-    except sqlite3.Error:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+        VALUES (?, ?, ?, ?)
+        """,
+        (product_name, price, stock, product_name_key)
+    )
+    return {
+        "id": cursor.lastrowid,
+        "name": product_name,
+        "price": price,
+        "stock": stock
+    }
 
 
 def create_cart_item(
+        connection: sqlite3.Connection,
         product_id: int,
         quantity: int
 ):
-
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-
-        cursor.execute(
-            """
-            INSERT INTO cart_items (product_id, quantity)
-            VALUES (?, ?)
-            """,
-            (product_id, quantity)
-        )
-
-        connection.commit()
-
-        return cursor.lastrowid
-
-    except sqlite3.Error:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+    cursor = connection.execute(
+        """
+        INSERT INTO cart_items (product_id, quantity)
+        VALUES (?, ?)
+        """,
+        (product_id, quantity)
+    )
+    return cursor.lastrowid
 
 
-def get_cart_item_by_product_id(product_id: int):
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            SELECT id, product_id, quantity
-            FROM cart_items
-            WHERE product_id = ?
-            """,
-            (product_id,)
-        )
-
-        return cursor.fetchone()
-
-    finally:
-        connection.close()
+def get_cart_item_by_product_id(connection: sqlite3.Connection, product_id: int):
+    cursor = connection.execute(
+        """
+        SELECT id, product_id, quantity
+        FROM cart_items
+        WHERE product_id = ?
+        """,
+        (product_id,)
+    )
+    return cursor.fetchone()
 
 
 def update_cart_item_quantity(
+        connection: sqlite3.Connection,
         cart_item_id: int,
         quantity: int
 ):
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            UPDATE cart_items
-            SET quantity = ?
-            WHERE id = ?
-            """,
-            (quantity, cart_item_id)
-        )
-
-        connection.commit()
-
-        return cart_item_id
-
-    except sqlite3.Error:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+    cursor = connection.execute(
+        """
+        UPDATE cart_items
+        SET quantity = ?
+        WHERE id = ?
+        """,
+        (quantity, cart_item_id)
+    )
+    return cursor.fetchall()
 
 
-def get_cart_items():
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            SELECT 
-                cart_items.id,
-                cart_items.product_id,
-                product.name,
-                product.price,
-                cart_items.quantity
-            FROM cart_items
-            JOIN product
-                ON cart_items.product_id = product.id
-            """
-        )
-
-        return cursor.fetchall()
-
-    finally:
-        connection.close()
+def get_cart_items(connection: sqlite3.Connection):
+    cursor = connection.execute(
+        """
+        SELECT 
+            cart_items.id,
+            cart_items.product_id,
+            product.name,
+            product.price,
+            cart_items.quantity
+        FROM cart_items
+        JOIN product
+            ON cart_items.product_id = product.id
+        """
+    )
+    return cursor.fetchall()
 
 
-def delete_cart_item_by_product_id(product_id: int) -> bool:
-    connection = get_connection()
-    cursor = connection.cursor()
-
-    try:
-        cursor.execute(
-            """
-            DELETE FROM cart_items
-            WHERE product_id = ?
-            """,
-            (product_id,)
-        )
-
-        connection.commit()
-
-        return cursor.rowcount > 0
-
-    except sqlite3.Error:
-        connection.rollback()
-        raise
-
-    finally:
-        connection.close()
+def delete_cart_item_by_product_id(connection: sqlite3.Connection, product_id: int) -> bool:
+    cursor = connection.execute(
+        """
+        DELETE FROM cart_items
+        WHERE product_id = ?
+        """,
+        (product_id,)
+    )
+    return cursor.rowcount > 0
