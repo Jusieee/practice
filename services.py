@@ -19,35 +19,26 @@ class CartItemNotFoundError(Exception):
     pass
 
 def add_product_to_cart(
+        connection,
         product_id: int,
         quantity: int
 ):
-    product = get_product_by_id(product_id)
+    with connection:
+        product = get_product_by_id(connection, product_id)
+        if product is None:
+            raise ProductNotFoundError
 
-    if product is None:
-        raise ProductNotFoundError
+        cart_item = get_cart_item_by_product_id(connection, product_id)
+        current = cart_item["quantity"] if cart_item else 0
+        total_quantity = current + quantity
+        if total_quantity > product["stock"]:
+            raise InsufficientStockError(product["stock"])
 
-    cart_item = get_cart_item_by_product_id(product_id)
-
-    if cart_item is None:
-        total_quantity = quantity
-    else:
-        total_quantity = cart_item["quantity"] + quantity
-
-    if total_quantity > product["stock"]:
-        raise InsufficientStockError(product["stock"])
-
-    if cart_item is None:
-        cart_item_id = create_cart_item(
-            product_id=product_id,
-            quantity=quantity
-        )
-    else:
-        update_cart_item_quantity(
-            cart_item_id=cart_item["id"],
-            quantity=total_quantity
-        )
-        cart_item_id = cart_item["id"]
+        if cart_item is None:
+            cart_item_id = create_cart_item(connection, product_id, quantity)
+        else:
+            cart_item_id = cart_item["id"]
+            update_cart_item_quantity(connection, cart_item_id, total_quantity)
 
     return {
         "id": cart_item_id,
@@ -57,15 +48,15 @@ def add_product_to_cart(
     }
 
 
-def get_cart():
-    cart_items = get_cart_items()
-    items = []
-    total = 0
-
-    for item in cart_items:
-        item_total = item["price"] * item["quantity"]
-        total += item_total
-        items.append(
+def get_cart(connection):
+    with connection:
+        cart_items = get_cart_items(connection)
+        items = []
+        total = 0
+        for item in cart_items:
+            item_total = item["price"] * item["quantity"]
+            total += item_total
+            items.append(
             {
                 "id": item["id"],
                 "product_id": item["product_id"],
@@ -74,40 +65,36 @@ def get_cart():
                 "quantity": item["quantity"],
                 "total_price": item_total
             }
-        )
-
+            )
     return {
         "items": items,
         "total": total
     }
 
 
-def remove_product_from_cart(product_id: int):
-    removed = delete_cart_item_by_product_id(product_id)
-
-    if not removed:
-        raise CartItemNotFoundError
+def remove_product_from_cart(connection, product_id: int):
+    with connection:
+        removed = delete_cart_item_by_product_id(connection, product_id)
+        if not removed:
+            raise CartItemNotFoundError
 
 
 def set_cart_item_quantity(
+        connection,
         product_id: int,
         quantity: int
 ):
-    product = get_product_by_id(product_id)
+    with connection:
+        product = get_product_by_id(connection, product_id)
+        if product is None:
+            raise ProductNotFoundError
 
-    if product is None:
-        raise ProductNotFoundError
-
-    cart_item = get_cart_item_by_product_id(product_id)
-
-    if cart_item is None:
-        raise CartItemNotFoundError
-
-    if quantity > product["stock"]:
-        raise InsufficientStockError(product["stock"])
-
-    update_cart_item_quantity(cart_item["id"], quantity)
-
+        cart_item = get_cart_item_by_product_id(connection, product_id)
+        if cart_item is None:
+            raise CartItemNotFoundError
+        if quantity > product["stock"]:
+            raise InsufficientStockError(product["stock"])
+        update_cart_item_quantity(connection, cart_item["id"], quantity)
     return {
         "id": cart_item["id"],
         "product_id": product_id,
