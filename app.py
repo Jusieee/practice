@@ -35,16 +35,17 @@ from database import get_db
 
 app = FastAPI()
 
+
 @app.get("/")
 def home():
     return {"message": "Добро пожаловать в API нашего интернет-магазина!"}
+
 
 @app.get("/products", response_model=list[Product])
 def get_products(
         connection: sqlite3.Connection = Depends(get_db)
 ):
     products = get_all_products(connection)
-
     return [
         {
             "id": product["id"],
@@ -55,20 +56,20 @@ def get_products(
         for product in products
     ]
 
+
 @app.post(
     "/products",
     response_model=Product,
     status_code=status.HTTP_201_CREATED
 )
-def create_product_endpoint(product: ProductCreate):
-
+def create_product_endpoint(product: ProductCreate, connection: sqlite3.Connection = Depends(get_db)):
     try:
         return create_product(
-            name=product.name,
-            price=product.price,
-            stock=product.stock
+            connection,
+            product.name,
+            product.price,
+            product.stock
         )
-
     except sqlite3.IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -87,16 +88,12 @@ def create_product_endpoint(product: ProductCreate):
     status_code=status.HTTP_201_CREATED,
     response_model=CartItemActionResponse
 )
-def add_to_cart(item: CartItemCreate):
-
+def add_to_cart(
+    item: CartItemCreate,
+    connection: sqlite3.Connection = Depends(get_db)
+):
     try:
-        # Добавление товара в корзину
-        cart_item = add_product_to_cart(
-            product_id=item.product_id,
-            quantity=item.quantity
-        )
-        return cart_item
-
+        return add_product_to_cart(connection, item.product_id, item.quantity)
     except ProductNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -117,9 +114,11 @@ def add_to_cart(item: CartItemCreate):
 
 
 @app.get("/products/{product_id}", response_model=Product)
-def get_product(product_id: int = Path(gt=0)):
-    product = get_product_by_id(product_id)
-
+def get_product(
+    product_id: int = Path(gt=0),
+    connection: sqlite3.Connection = Depends(get_db)
+):
+    product = get_product_by_id(connection, product_id)
     if product is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -133,13 +132,17 @@ def get_product(product_id: int = Path(gt=0)):
         "stock": product["stock"],
     }
 
+
 @app.delete(
     "/products/{product_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-def delete_product(product_id: int = Path(gt=0)):
+def delete_product(
+    product_id: int = Path(gt=0),
+    connection: sqlite3.Connection = Depends(get_db)
+):
     try:
-        deleted = delete_product_by_id(product_id)
+        deleted = delete_product_by_id(connection, product_id)
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -151,46 +154,46 @@ def delete_product(product_id: int = Path(gt=0)):
             detail="Серверная ошибка"
         )
 
+
 @app.put("/products/{product_id}",
          response_model=Product)
 def update_product(
     product: ProductUpdate,
     product_id: int = Path(gt=0),
+    connection: sqlite3.Connection = Depends(get_db)
 ):
-
     try:
         updated_product = update_product_by_id(
+            connection,
             product_id=product_id,
             name=product.name,
             price=product.price,
             stock=product.stock
         )
-
         if updated_product is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Такого товара нету"
             )
-
         return updated_product
-
     except sqlite3.IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Товар с такой информацией уже есть"
         )
+
     except sqlite3.Error:
         raise  HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
 
+
 @app.get("/cart",
          response_model=CartResponse)
-def get_cart_endpoint():
+def get_cart_endpoint(connection: sqlite3.Connection = Depends(get_db)):
     try:
-        return get_cart()
-
+        return get_cart(connection)
     except sqlite3.Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -200,10 +203,12 @@ def get_cart_endpoint():
 
 @app.delete("/cart/items/{product_id}",
             status_code=status.HTTP_204_NO_CONTENT)
-def delete_cart_items_endpoint(product_id: int = Path(gt=0)):
+def delete_cart_items_endpoint(
+    product_id: int = Path(gt=0),
+    connection: sqlite3.Connection = Depends(get_db)
+):
     try:
-        remove_product_from_cart(product_id)
-
+        remove_product_from_cart(connection, product_id)
     except CartItemNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -222,14 +227,15 @@ def delete_cart_items_endpoint(product_id: int = Path(gt=0)):
            )
 def update_cart_item(
         item: CartItemUpdate,
-        product_id: int = Path(gt=0)
+        product_id: int = Path(gt=0),
+        connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
         return set_cart_item_quantity(
+            connection,
             product_id=product_id,
             quantity=item.quantity
         )
-
     except ProductNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -257,39 +263,3 @@ def update_cart_item(
 
 def get_test_dependency():
     return "Зависимость сработала"
-
-
-@app.get("/depends-demo")
-def depends_demo(
-        message: str = Depends(get_test_dependency)
-):
-    return {
-        "message": message
-    }
-
-
-def get_limit(
-        limit: int = Query(default=10, ge=1, le=100)
-):
-    return limit
-
-@app.get("/depends-limit")
-def depends_limit(
-        limit: int = Depends(get_limit)
-):
-    return {
-        "limit": limit
-    }
-
-
-@app.get("/depends-db")
-def depends_db(
-        connection: sqlite3.Connection = Depends(get_db)
-):
-    print("2. Endpoint работает")
-
-    connection.execute("SELECT 1")
-
-    return {
-        "message": "Соединение с БД получено"
-    }
