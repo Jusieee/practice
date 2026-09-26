@@ -64,12 +64,13 @@ def get_products(
 )
 def create_product_endpoint(product: ProductCreate, connection: sqlite3.Connection = Depends(get_db)):
     try:
-        return create_product(
-            connection,
-            product.name,
-            product.price,
-            product.stock
-        )
+        with connection:
+            return create_product(
+                connection,
+                product.name,
+                product.price,
+                product.stock
+            )
     except sqlite3.IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -93,7 +94,8 @@ def add_to_cart(
     connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        return add_product_to_cart(connection, item.product_id, item.quantity)
+        with connection:
+            return add_product_to_cart(connection, item.product_id, item.quantity)
     except ProductNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -142,12 +144,13 @@ def delete_product(
     connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        deleted = delete_product_by_id(connection, product_id)
-        if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Такого товара нету"
-            )
+        with connection:
+            deleted = delete_product_by_id(connection, product_id)
+            if not deleted:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Такого товара нету"
+                )
     except sqlite3.Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -163,19 +166,20 @@ def update_product(
     connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        updated_product = update_product_by_id(
-            connection,
-            product_id=product_id,
-            name=product.name,
-            price=product.price,
-            stock=product.stock
-        )
-        if updated_product is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Такого товара нету"
+        with connection:
+            updated_product = update_product_by_id(
+                connection,
+                product_id=product_id,
+                name=product.name,
+                price=product.price,
+                stock=product.stock
             )
-        return updated_product
+            if updated_product is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Такого товара нету"
+                )
+            return updated_product
     except sqlite3.IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -208,7 +212,8 @@ def delete_cart_items_endpoint(
     connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        remove_product_from_cart(connection, product_id)
+        with connection:
+            remove_product_from_cart(connection, product_id)
     except CartItemNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -231,11 +236,12 @@ def update_cart_item(
         connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        return set_cart_item_quantity(
-            connection,
-            product_id=product_id,
-            quantity=item.quantity
-        )
+        with connection:
+            return set_cart_item_quantity(
+                connection,
+                product_id=product_id,
+                quantity=item.quantity
+            )
     except ProductNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -259,7 +265,3 @@ def update_cart_item(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
-
-
-def get_test_dependency():
-    return "Зависимость сработала"
