@@ -49,23 +49,23 @@ def add_product_to_cart(
 
 
 def get_cart(connection):
-    with connection:
-        cart_items = get_cart_items(connection)
-        items = []
-        total = 0
-        for item in cart_items:
-            item_total = item["price"] * item["quantity"]
-            total += item_total
-            items.append(
-            {
-                "id": item["id"],
-                "product_id": item["product_id"],
-                "product_name": item["name"],
-                "price": item["price"],
-                "quantity": item["quantity"],
-                "total_price": item_total
-            }
-            )
+
+    cart_items = get_cart_items(connection)
+    items = []
+    total = 0
+    for item in cart_items:
+        item_total = item["price"] * item["quantity"]
+        total += item_total
+        items.append(
+        {
+            "id": item["id"],
+            "product_id": item["product_id"],
+            "product_name": item["name"],
+            "price": item["price"],
+            "quantity": item["quantity"],
+            "total_price": item_total
+        }
+        )
     return {
         "items": items,
         "total": total

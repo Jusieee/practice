@@ -63,7 +63,7 @@ def update_product_by_id(
             name_key = ?
         WHERE id = ?
         """,
-    (
+        (
             product_name,
             price,
             stock,
@@ -85,11 +85,9 @@ def create_product(
         price: float,
         stock: int
 ):
-
-    cursor = connection.cursor()
     product_name = name.strip()
     product_name_key = product_name.casefold()
-    cursor.execute(
+    cursor = connection.execute(
         """
         INSERT INTO product (
             name,
@@ -149,7 +147,7 @@ def update_cart_item_quantity(
         """,
         (quantity, cart_item_id)
     )
-    return cursor.fetchall()
+    return cursor.rowcount > 0
 
 
 def get_cart_items(connection: sqlite3.Connection):

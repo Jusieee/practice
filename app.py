@@ -1,6 +1,6 @@
 import sqlite3
 
-from fastapi import Depends, FastAPI, HTTPException, status, Path, Query
+from fastapi import Depends, FastAPI, HTTPException, status, Path
 
 from schemas import (
     Product,
@@ -187,7 +187,7 @@ def update_product(
         )
 
     except sqlite3.Error:
-        raise  HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Серверная ошибка"
         )
