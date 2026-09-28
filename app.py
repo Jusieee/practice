@@ -94,8 +94,7 @@ def add_to_cart(
     connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        with connection:
-            return add_product_to_cart(connection, item.product_id, item.quantity)
+        return add_product_to_cart(connection, item.product_id, item.quantity)
     except ProductNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -212,8 +211,7 @@ def delete_cart_items_endpoint(
     connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        with connection:
-            remove_product_from_cart(connection, product_id)
+        remove_product_from_cart(connection, product_id)
     except CartItemNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -236,12 +234,11 @@ def update_cart_item(
         connection: sqlite3.Connection = Depends(get_db)
 ):
     try:
-        with connection:
-            return set_cart_item_quantity(
-                connection,
-                product_id=product_id,
-                quantity=item.quantity
-            )
+        return set_cart_item_quantity(
+            connection,
+            product_id=product_id,
+            quantity=item.quantity
+        )
     except ProductNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
