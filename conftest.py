@@ -41,7 +41,7 @@ def fake_cart_item():
 
 @pytest.fixture
 def db_path(tmp_path):
-    path = tmp_path / "test_online_shop.py"
+    path = tmp_path / "test_online_shop.db"
     connection = sqlite3.connect(path)
     connection.executescript(SCHEMA)
     connection.close()
