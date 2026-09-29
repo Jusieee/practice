@@ -1,5 +1,7 @@
 import pytest
 
+from conftest import db_connection
+
 from services import (
     InsufficientStockError,
     ProductNotFoundError,
@@ -9,7 +11,7 @@ from services import (
 )
 
 
-def test_get_cart_calculates_total(monkeypatch):
+def test_get_cart_calculates_total(db_connection, monkeypatch):
     fake_cart_items = [
         {
             "id": 1,
@@ -29,17 +31,17 @@ def test_get_cart_calculates_total(monkeypatch):
 
     monkeypatch.setattr(
         "services.get_cart_items",
-        lambda: fake_cart_items
+        lambda connection: fake_cart_items
     )
 
-    result = get_cart()
+    result = get_cart(db_connection)
 
     assert result["total"] == 5000
     assert result["items"][0]["total_price"] == 2000
     assert result["items"][1]["total_price"] == 3000
 
 
-def test_add_product_to_cart_not_enough_stock(monkeypatch):
+def test_add_product_to_cart_not_enough_stock(monkeypatch, db_connection):
     fake_product = {
         "id": 1,
         "name": "Мышь",
@@ -55,12 +57,12 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
 
     monkeypatch.setattr(
         "services.get_product_by_id",
-        lambda product_id: fake_product
+        lambda connection, product_id: fake_product
     )
 
     monkeypatch.setattr(
         "services.get_cart_item_by_product_id",
-        lambda product_id: fake_cart_item
+        lambda connection, product_id: fake_cart_item
     )
 
     def fail_if_called(*args, **kwargs):
@@ -80,6 +82,7 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
 
     with pytest.raises(InsufficientStockError) as error:
         add_product_to_cart(
+            db_connection,
             product_id=1,
             quantity=4
         )
@@ -87,21 +90,21 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
     assert error.value.available == 5
 
 
-def test_add_product_to_cart_creates_new_item(monkeypatch, fake_product):
+def test_add_product_to_cart_creates_new_item(monkeypatch, fake_product, db_connection):
 
     monkeypatch.setattr(
         "services.get_product_by_id",
-        lambda product_id: fake_product
+        lambda connection, product_id: fake_product
     )
 
     monkeypatch.setattr(
         "services.get_cart_item_by_product_id",
-        lambda product_id: None
+        lambda connection, product_id: None
     )
 
     created_data = {}
 
-    def fake_create_cart_item(product_id, quantity):
+    def fake_create_cart_item(connection, product_id, quantity):
         created_data["product_id"] = product_id
         created_data["quantity"] = quantity
 
@@ -113,6 +116,7 @@ def test_add_product_to_cart_creates_new_item(monkeypatch, fake_product):
     )
 
     result = add_product_to_cart(
+        db_connection,
         product_id=1,
         quantity=3
     )
@@ -129,18 +133,19 @@ def test_add_product_to_cart_creates_new_item(monkeypatch, fake_product):
 def test_add_product_to_cart_updates_existing_item(
         monkeypatch,
         fake_product,
-        fake_cart_item
+        fake_cart_item,
+        db_connection
 ):
 
 
     monkeypatch.setattr(
         "services.get_product_by_id",
-        lambda product_id: fake_product
+        lambda connection, product_id: fake_product
     )
 
     monkeypatch.setattr(
         "services.get_cart_item_by_product_id",
-        lambda product_id: fake_cart_item
+        lambda connection, product_id: fake_cart_item
     )
 
     def fail_if_called(*args, **kwargs):
@@ -155,7 +160,7 @@ def test_add_product_to_cart_updates_existing_item(
 
     updated_data = {}
 
-    def fake_update_cart_item_quantity(cart_item_id, quantity):
+    def fake_update_cart_item_quantity(connection, cart_item_id, quantity):
         updated_data["cart_item_id"] = cart_item_id
         updated_data["quantity"] = quantity
 
@@ -165,6 +170,7 @@ def test_add_product_to_cart_updates_existing_item(
     )
 
     result = add_product_to_cart(
+        db_connection,
         product_id=1,
         quantity=2
     )
@@ -178,10 +184,10 @@ def test_add_product_to_cart_updates_existing_item(
     assert result["quantity"] == 5
 
 
-def test_add_product_to_cart_not_found_item(monkeypatch):
+def test_add_product_to_cart_not_found_item(monkeypatch, db_connection):
     monkeypatch.setattr(
         "services.get_product_by_id",
-        lambda product_id: None
+        lambda connection, product_id: None
     )
 
     def fail_if_called(*args, **kwargs):
@@ -196,12 +202,13 @@ def test_add_product_to_cart_not_found_item(monkeypatch):
 
     with pytest.raises(ProductNotFoundError):
         add_product_to_cart(
+            db_connection,
             product_id=999,
             quantity=1
         )
 
 
-def test_update_set_cart_item_quantity(monkeypatch):
+def test_update_set_cart_item_quantity(monkeypatch, db_connection):
     fake_product = {
         "id": 1,
         "name": "Мышь",
@@ -217,17 +224,17 @@ def test_update_set_cart_item_quantity(monkeypatch):
 
     monkeypatch.setattr(
         "services.get_product_by_id",
-        lambda product_id: fake_product
+        lambda connection, product_id: fake_product
     )
 
     monkeypatch.setattr(
         "services.get_cart_item_by_product_id",
-        lambda product_id: fake_cart_item
+        lambda connection, product_id: fake_cart_item
     )
 
     updated_data = {}
 
-    def fake_update_cart_item_quantity(cart_item_id, quantity):
+    def fake_update_cart_item_quantity(connection, cart_item_id, quantity):
         updated_data["cart_item_id"] = cart_item_id
         updated_data["quantity"] = quantity
 
@@ -237,6 +244,7 @@ def test_update_set_cart_item_quantity(monkeypatch):
     )
 
     result = set_cart_item_quantity(
+        db_connection,
         product_id=1,
         quantity=4
     )
@@ -253,16 +261,17 @@ def test_update_set_cart_item_quantity(monkeypatch):
 def test_set_cart_item_quantity_not_enough_stock(
         monkeypatch,
         fake_product,
-        fake_cart_item
+        fake_cart_item,
+        db_connection
 ):
     monkeypatch.setattr(
         "services.get_product_by_id",
-        lambda product_id: fake_product
+        lambda connection, product_id: fake_product
     )
 
     monkeypatch.setattr(
         "services.get_cart_item_by_product_id",
-        lambda product_id: fake_cart_item
+        lambda connection, product_id: fake_cart_item
     )
 
     def fail_if_called(*args, **kwargs):
@@ -277,6 +286,7 @@ def test_set_cart_item_quantity_not_enough_stock(
 
     with pytest.raises(InsufficientStockError) as error:
         set_cart_item_quantity(
+            db_connection,
             product_id=1,
             quantity=15
         )
