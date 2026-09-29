@@ -1,7 +1,5 @@
 import pytest
 
-from conftest import db_connection
-
 from services import (
     InsufficientStockError,
     ProductNotFoundError,
