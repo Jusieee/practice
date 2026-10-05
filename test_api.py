@@ -451,3 +451,48 @@ def test_cart_flow(client):
     assert response.status_code == 201
     cart = client.get("/cart")
     assert cart.json()["total"] == 2000
+
+
+def test_updated_product_is_saved(client):
+    created = client.post(
+        "/products",
+        json={
+            "name": "Мышь",
+            "price": 1000,
+            "stock": 5
+        }
+    )
+    product_id = created.json()["id"]
+
+    updated = client.put(
+        f"/products/{product_id}",
+        json={
+            "name": "Мышь",
+            "price": 500,
+            "stock": 10
+        }
+    )
+    assert updated.status_code == 200
+
+    response = client.get(f"/products/{updated.json()['id']}")
+    assert response.json()["price"] == 500
+    assert response.json()["stock"] == 10
+
+
+def test_deleted_product_is_gone(client):
+    created = client.post(
+        "/products",
+        json={
+            "name": "Мышь",
+            "price": 1000,
+            "stock": 5
+        }
+    )
+    product_id = created.json()["id"]
+
+    deleted = client.delete(
+        f"/products/{product_id}"
+    )
+    assert deleted.status_code == 204
+    response = client.get(f"/products/{product_id}")
+    assert response.status_code == 404
