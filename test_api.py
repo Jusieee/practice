@@ -428,3 +428,26 @@ def test_created_product_is_saved(client):
     response = client.get(f"/products/{created.json()['id']}")
     assert response.status_code == 200
     assert response.json()["name"] == "Мышь"
+
+
+def test_cart_flow(client):
+    created = client.post(
+        "/products",
+        json={
+            "name": "Мышь",
+            "price": 1000,
+            "stock": 5
+        }
+    )
+    product_id = created.json()["id"]
+
+    response = client.post(
+        "/cart/items",
+        json={
+            "product_id": product_id,
+            "quantity": 2
+        }
+    )
+    assert response.status_code == 201
+    cart = client.get("/cart")
+    assert cart.json()["total"] == 2000
