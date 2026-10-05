@@ -475,6 +475,7 @@ def test_updated_product_is_saved(client):
     assert updated.status_code == 200
 
     response = client.get(f"/products/{updated.json()['id']}")
+    assert response.status_code == 200
     assert response.json()["price"] == 500
     assert response.json()["stock"] == 10
 
