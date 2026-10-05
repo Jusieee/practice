@@ -1,17 +1,11 @@
-from fastapi.testclient import TestClient
-
-from app import app
-
 import sqlite3
 
 from services import CartItemNotFoundError, InsufficientStockError ,ProductNotFoundError
 
 import pytest
 
-client = TestClient(app)
 
-
-def test_home():
+def test_home(client):
     response = client.get("/")
 
     assert response.status_code == 200
@@ -20,19 +14,19 @@ def test_home():
     }
 
 
-def test_get_product_invalid_id():
+def test_get_product_invalid_id(client):
     response = client.get("/products/0")
 
     assert response.status_code == 422
 
 
-def test_get_product_invalid_string_id():
+def test_get_product_invalid_string_id(client):
     response = client.get("/products/hello")
 
     assert response.status_code == 422
 
 
-def test_get_product_success(monkeypatch):
+def test_get_product_success(monkeypatch, client):
     fake_product = {
         "id": 1,
         "name": "Мышь",
@@ -42,7 +36,7 @@ def test_get_product_success(monkeypatch):
 
     monkeypatch.setattr(
         "app.get_product_by_id",
-        lambda product_id: fake_product
+        lambda connection, product_id: fake_product
     )
 
     response = client.get("/products/1")
@@ -56,10 +50,10 @@ def test_get_product_success(monkeypatch):
     }
 
 
-def test_get_product_not_found(monkeypatch):
+def test_get_product_not_found(monkeypatch, client):
     monkeypatch.setattr(
         "app.get_product_by_id",
-        lambda product_id: None
+        lambda connection, product_id: None
     )
 
     response = client.get("/products/999")
@@ -70,7 +64,7 @@ def test_get_product_not_found(monkeypatch):
     }
 
 
-def test_create_product_success(monkeypatch):
+def test_create_product_success(monkeypatch, client):
     fake_created_product = {
         "id": 10,
         "name": "Монитор",
@@ -80,7 +74,7 @@ def test_create_product_success(monkeypatch):
 
     monkeypatch.setattr(
         "app.create_product",
-        lambda name, price, stock: fake_created_product
+        lambda connection, name, price, stock: fake_created_product
     )
 
     response = client.post(
@@ -102,8 +96,8 @@ def test_create_product_success(monkeypatch):
     }
 
 
-def test_create_product_duplicate(monkeypatch):
-    def fake_create_product(name, price, stock):
+def test_create_product_duplicate(monkeypatch, client):
+    def fake_create_product(connection, name, price, stock):
         raise sqlite3.IntegrityError
 
     monkeypatch.setattr(
@@ -127,7 +121,7 @@ def test_create_product_duplicate(monkeypatch):
     }
 
 
-def test_add_product_to_cart_success(monkeypatch):
+def test_add_product_to_cart_success(monkeypatch, client):
     fake_cart_item = {
         "id": 10,
         "product_id": 1,
@@ -137,7 +131,7 @@ def test_add_product_to_cart_success(monkeypatch):
 
     monkeypatch.setattr(
         "app.add_product_to_cart",
-        lambda product_id, quantity: fake_cart_item
+        lambda connection, product_id, quantity: fake_cart_item
     )
 
     response = client.post(
@@ -158,8 +152,8 @@ def test_add_product_to_cart_success(monkeypatch):
     }
 
 
-def test_add_product_to_cart_product_not_found(monkeypatch):
-    def fake_add_product_to_cart(product_id, quantity):
+def test_add_product_to_cart_product_not_found(monkeypatch, client):
+    def fake_add_product_to_cart(connection, product_id, quantity):
         raise ProductNotFoundError
 
     monkeypatch.setattr(
@@ -182,8 +176,8 @@ def test_add_product_to_cart_product_not_found(monkeypatch):
     }
 
 
-def test_add_product_to_cart_not_enough_stock(monkeypatch):
-    def fake_add_product_to_cart(product_id, quantity):
+def test_add_product_to_cart_not_enough_stock(monkeypatch, client):
+    def fake_add_product_to_cart(connection, product_id, quantity):
         raise InsufficientStockError(5)
 
     monkeypatch.setattr(
@@ -206,7 +200,7 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch):
     }
 
 
-def test_set_cart_item_quantity_success(monkeypatch):
+def test_set_cart_item_quantity_success(monkeypatch, client):
     fake_cart_item = {
         "id": 15,
         "product_id": 1,
@@ -216,7 +210,7 @@ def test_set_cart_item_quantity_success(monkeypatch):
 
     monkeypatch.setattr(
         "app.set_cart_item_quantity",
-        lambda product_id, quantity: fake_cart_item
+        lambda connection, product_id, quantity: fake_cart_item
     )
 
     response = client.patch(
@@ -236,8 +230,8 @@ def test_set_cart_item_quantity_success(monkeypatch):
     }
 
 
-def test_set_cart_item_quantity_product_not_found(monkeypatch):
-    def fake_set_cart_item_quantity(product_id, quantity):
+def test_set_cart_item_quantity_product_not_found(monkeypatch, client):
+    def fake_set_cart_item_quantity(connection, product_id, quantity):
         raise ProductNotFoundError
 
     monkeypatch.setattr(
@@ -255,8 +249,8 @@ def test_set_cart_item_quantity_product_not_found(monkeypatch):
     assert response.status_code == 404
 
 
-def test_set_cart_item_quantity_cart_item_not_found(monkeypatch):
-    def fake_set_cart_item_quantity(product_id, quantity):
+def test_set_cart_item_quantity_cart_item_not_found(monkeypatch, client):
+    def fake_set_cart_item_quantity(connection, product_id, quantity):
         raise CartItemNotFoundError
 
     monkeypatch.setattr(
@@ -278,8 +272,8 @@ def test_set_cart_item_quantity_cart_item_not_found(monkeypatch):
     }
 
 
-def test_set_cart_item_quantity_not_enough_stock(monkeypatch):
-    def fake_cart_item_quantity(product_id,quantity):
+def test_set_cart_item_quantity_not_enough_stock(monkeypatch, client):
+    def fake_cart_item_quantity(connection, product_id,quantity):
         raise InsufficientStockError(5)
 
     monkeypatch.setattr(
@@ -301,7 +295,7 @@ def test_set_cart_item_quantity_not_enough_stock(monkeypatch):
     }
 
 
-def test_set_cart_item_quantity_invalid_quantity(monkeypatch):
+def test_set_cart_item_quantity_invalid_quantity(monkeypatch, client):
     def fail_if_called(*args, **kwargs):
         raise AssertionError(
             "Функция не должна запускаться"
@@ -322,10 +316,10 @@ def test_set_cart_item_quantity_invalid_quantity(monkeypatch):
     assert response.status_code == 422
 
 
-def test_delete_cart_item_success(monkeypatch):
+def test_delete_cart_item_success(monkeypatch, client):
     monkeypatch.setattr(
         "app.remove_product_from_cart",
-        lambda product_id: None
+        lambda connection, product_id: None
     )
 
     response = client.delete("/cart/items/1")
@@ -335,7 +329,7 @@ def test_delete_cart_item_success(monkeypatch):
     assert response.content == b""
 
 
-def test_delete_cart_item_not_found(monkeypatch):
+def test_delete_cart_item_not_found(monkeypatch, client):
     def fake_remove_product_from_cart(*args, **kwargs):
         raise CartItemNotFoundError
 
@@ -359,7 +353,8 @@ def test_delete_cart_item_not_found(monkeypatch):
 )
 def test_add_product_to_cart_invalid_quantity(
         monkeypatch,
-        quantity
+        quantity,
+        client
 ):
     def fail_if_called(*args, **kwargs):
         raise AssertionError(
@@ -394,7 +389,8 @@ def test_add_product_to_cart_invalid_quantity(
 def test_create_product_invalid_data(
     monkeypatch,
     price,
-    stock
+    stock,
+    client
 ):
     def fail_if_called(*args, **kwargs):
         raise AssertionError(
@@ -416,3 +412,19 @@ def test_create_product_invalid_data(
     )
 
     assert response.status_code == 422
+
+
+def test_created_product_is_saved(client):
+    created = client.post(
+        "/products",
+        json={
+            "name": "Мышь",
+            "price": 1000,
+            "stock": 5
+        }
+    )
+    assert created.status_code == 201
+
+    response = client.get(f"/products/{created.json()['id']}")
+    assert response.status_code == 200
+    assert response.json()["name"] == "Мышь"
