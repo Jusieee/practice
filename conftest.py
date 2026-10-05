@@ -2,6 +2,12 @@ import pytest
 
 import sqlite3
 
+from fastapi.testclient import TestClient
+
+from app import app
+
+from database import get_db
+
 
 SCHEMA = """
 CREATE TABLE product(
@@ -47,9 +53,25 @@ def db_path(tmp_path):
     connection.close()
     return path
 
+
 @pytest.fixture
 def db_connection(db_path):
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
     yield connection
     connection.close()
+
+
+@pytest.fixture
+def client(db_path):
+    def override_get_db():
+        connection = sqlite3.connect(db_path, check_same_thread=False)
+        connection.row_factory = sqlite3.Row
+        try:
+            yield connection
+        finally:
+            connection.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+    yield TestClient(app)
+    app.dependency_overrides.clear()
