@@ -1,6 +1,6 @@
 import sqlite3
 
-from services import CartItemNotFoundError, InsufficientStockError ,ProductNotFoundError
+from services import CartItemNotFoundError, InsufficientStockError, ProductNotFoundError
 
 import pytest
 
@@ -273,12 +273,12 @@ def test_set_cart_item_quantity_cart_item_not_found(monkeypatch, client):
 
 
 def test_set_cart_item_quantity_not_enough_stock(monkeypatch, client):
-    def fake_cart_item_quantity(connection, product_id,quantity):
+    def fake_set_cart_item_quantity(connection, product_id, quantity):
         raise InsufficientStockError(5)
 
     monkeypatch.setattr(
         "app.set_cart_item_quantity",
-        fake_cart_item_quantity
+        fake_set_cart_item_quantity
     )
 
     response = client.patch(
