@@ -1,6 +1,8 @@
 import sqlite3
 
-from fastapi import Depends, FastAPI, HTTPException, status, Path
+from fastapi import Depends, FastAPI, HTTPException, status, Path, Request
+
+from fastapi.responses import JSONResponse
 
 from schemas import (
     Product,
@@ -34,6 +36,30 @@ from database import get_db
 
 
 app = FastAPI()
+
+
+@app.exception_handler(ProductNotFoundError)
+def product_not_found_handler(request: Request, exc: ProductNotFoundError):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Товар не найден"}
+    )
+
+
+@app.exception_handler(CartItemNotFoundError)
+def cart_item_not_found_handler(request: Request, exc: CartItemNotFoundError):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Товара нету в корзине"}
+    )
+
+
+@app.exception_handler(InsufficientStockError)
+def product_stock_error_handler(request: Request, exc: InsufficientStockError):
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": F"Недостаточно товара на складе, доступно:{exc.available} "}
+    )
 
 
 @app.get("/")
