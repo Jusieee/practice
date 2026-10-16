@@ -50,7 +50,7 @@ def product_not_found_handler(request: Request, exc: ProductNotFoundError):
 def cart_item_not_found_handler(request: Request, exc: CartItemNotFoundError):
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content={"detail": "Товара нету в корзине"}
+        content={"detail": "Товара нет в корзине"}
     )
 
 
@@ -58,7 +58,7 @@ def cart_item_not_found_handler(request: Request, exc: CartItemNotFoundError):
 def product_stock_error_handler(request: Request, exc: InsufficientStockError):
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
-        content={"detail": F"Недостаточно товара на складе, доступно:{exc.available} "}
+        content={"detail": f"Недостаточно товара на складе, доступно: {exc.available}"}
     )
 
 
