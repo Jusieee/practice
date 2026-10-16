@@ -1,6 +1,8 @@
 import sqlite3
 
-from fastapi import Depends, FastAPI, HTTPException, status, Path
+from fastapi import Depends, FastAPI, HTTPException, status, Path, Request
+
+from fastapi.responses import JSONResponse
 
 from schemas import (
     Product,
@@ -34,6 +36,30 @@ from database import get_db
 
 
 app = FastAPI()
+
+
+@app.exception_handler(ProductNotFoundError)
+def product_not_found_handler(request: Request, exc: ProductNotFoundError):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Товар не найден"}
+    )
+
+
+@app.exception_handler(CartItemNotFoundError)
+def cart_item_not_found_handler(request: Request, exc: CartItemNotFoundError):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Товара нет в корзине"}
+    )
+
+
+@app.exception_handler(InsufficientStockError)
+def product_stock_error_handler(request: Request, exc: InsufficientStockError):
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": f"Недостаточно товара на складе, доступно: {exc.available}"}
+    )
 
 
 @app.get("/")
@@ -95,18 +121,6 @@ def add_to_cart(
 ):
     try:
         return add_product_to_cart(connection, item.product_id, item.quantity)
-    except ProductNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товар не найден"
-        )
-
-    except InsufficientStockError as error:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Недостаточно товаров, доступно {error.available}"
-        )
-
     except sqlite3.Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -212,12 +226,6 @@ def delete_cart_items_endpoint(
 ):
     try:
         remove_product_from_cart(connection, product_id)
-    except CartItemNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товар не найден"
-        )
-
     except sqlite3.Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -239,24 +247,6 @@ def update_cart_item(
             product_id=product_id,
             quantity=item.quantity
         )
-    except ProductNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товар не найден"
-        )
-
-    except CartItemNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товара в корзине нету"
-        )
-
-    except InsufficientStockError as error:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Доступно только: {error.available} шт."
-        )
-
     except sqlite3.Error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
