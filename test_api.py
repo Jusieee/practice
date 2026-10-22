@@ -196,7 +196,7 @@ def test_add_product_to_cart_not_enough_stock(monkeypatch, client):
     assert response.status_code == 409
 
     assert response.json() == {
-        "detail": "Недостаточно товаров, доступно 5"
+        "detail": "Недостаточно товара на складе, доступно: 5"
     }
 
 
@@ -268,7 +268,7 @@ def test_set_cart_item_quantity_cart_item_not_found(monkeypatch, client):
     assert response.status_code == 404
 
     assert response.json() == {
-        "detail": "Товара в корзине нету"
+        "detail": "Товара нет в корзине"
     }
 
 
@@ -291,7 +291,7 @@ def test_set_cart_item_quantity_not_enough_stock(monkeypatch, client):
     assert response.status_code == 409
 
     assert response.json() == {
-        "detail": "Доступно только: 5 шт."
+        "detail": "Недостаточно товара на складе, доступно: 5"
     }
 
 
@@ -343,7 +343,7 @@ def test_delete_cart_item_not_found(monkeypatch, client):
     assert response.status_code == 404
 
     assert response.json() == {
-        "detail": "Товар не найден"
+        "detail": "Товара нет в корзине"
     }
 
 
@@ -497,3 +497,23 @@ def test_deleted_product_is_gone(client):
     assert deleted.status_code == 204
     response = client.get(f"/products/{product_id}")
     assert response.status_code == 404
+
+
+def test_delete_missing_cart_item(client):
+    created = client.post(
+        "/products",
+        json={
+            "name": "Мышь",
+            "price": 1,
+            "stock": 1
+        }
+    )
+    product_id = created.json()["id"]
+
+    deleted = client.delete(
+        f"/cart/items/{product_id}"
+    )
+    assert deleted.status_code == 404
+    assert deleted.json() == {
+        "detail": "Товара нет в корзине"
+    }
