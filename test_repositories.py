@@ -306,16 +306,20 @@ def test_delete_product_cascades_to_cart(db_connection):
         stock=10
     )
 
-    create_cart_item(
+    created_cart_item = create_cart_item(
         db_connection,
         product_id=product["id"],
         quantity=2
     )
 
-    delete_product_by_id(
+    assert created_cart_item is not None
+
+    deleted_product = delete_product_by_id(
         db_connection,
         product_id=product["id"]
     )
+
+    assert deleted_product is True
 
     cart_item = get_cart_item_by_product_id(
         db_connection,
