@@ -1,3 +1,5 @@
+from conftest import fake_product
+
 from repositories import (
     create_product,
     create_cart_item,
@@ -325,5 +327,18 @@ def test_delete_product_cascades_to_cart(db_connection):
         db_connection,
         product_id=product["id"]
     )
+
+    assert cart_item is None
+
+
+def test_create_cart_item_with_missing_product(db_connection):
+    with pytest.raises(sqlite3.IntegrityError):
+        create_cart_item(
+            db_connection,
+            product_id=999,
+            quantity=2
+        )
+
+    cart_item = get_cart_item_by_product_id(db_connection, 999)
 
     assert cart_item is None
