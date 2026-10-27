@@ -20,7 +20,7 @@ CREATE TABLE product(
 CREATE TABLE cart_items(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER NOT NULL,
-    quantity INTEGER DEFAULT 0
+    quantity INTEGER DEFAULT 0,
     FOREIGN KEY (product_id)
         REFERENCES product(id)
         ON DELETE CASCADE
@@ -53,7 +53,6 @@ def db_path(tmp_path):
     path = tmp_path / "test_online_shop.db"
     connection = sqlite3.connect(path)
     connection.executescript(SCHEMA)
-    connection.execute("PRAGMA foreign_keys = ON")
     connection.close()
     return path
 
@@ -62,6 +61,7 @@ def db_path(tmp_path):
 def db_connection(db_path):
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
     yield connection
     connection.close()
 
