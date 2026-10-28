@@ -11,6 +11,7 @@ def get_connection():
 
 def get_db():
     connection = get_connection()
+    connection.execute("PRAGMA foreign_keys = ON")
     try:
         yield connection
     finally:
