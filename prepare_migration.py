@@ -4,12 +4,12 @@ from pathlib import Path
 
 
 source_path = Path("online_shop.db")
-backup_path = Path("online_shop_migration_test.db")
+backup_path = Path("online_shop_migration_test_2.db")
 
 if not source_path.is_file():
     raise FileNotFoundError("Основная база не найдена")
 
-if not backup_path.exists():
+if backup_path.exists():
     raise FileExistsError("Тестовая копия уже существует")
 
 source = sqlite3.connect(
