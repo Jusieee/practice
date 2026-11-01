@@ -2,7 +2,6 @@ import sqlite3
 
 from pathlib import Path
 
-from check_shema import foreign_keys
 
 db_path = Path("online_shop_migration_test_2.db")
 
