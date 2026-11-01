@@ -19,7 +19,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT,
 product_id INTEGER,
 quantity INTEGER DEFAULT 0,
 FOREIGN KEY (product_id)
-    REFERENCE product(id)
+    REFERENCES product(id)
     ON DELETE CASCADE 
 )
 ''')
