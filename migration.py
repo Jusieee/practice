@@ -3,7 +3,7 @@ import sqlite3
 from pathlib import Path
 
 
-db_path = Path("online_shop_migration_test.db")
+db_path = Path("online_shop_migration_test_2.db")
 
 if not db_path.is_file():
     raise FileNotFoundError("Копия базы не найдена")
