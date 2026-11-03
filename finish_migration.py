@@ -37,7 +37,7 @@ try:
         "PRAGMA foreign_key_list(cart_items_new)"
     ).fetchall()
 
-    if not (row[2] == "product" for row in foreign_keys):
+    if not any(row[2] == "product" for row in foreign_keys):
         raise ValueError("Внешний ключ не найден")
 
     connection.execute("DROP TABLE cart_items")
