@@ -15,3 +15,8 @@ with psycopg.connect(
         cursor.execute("SELECT current_database()")
         result = cursor.fetchone()
         print("Текущая база: ", result[0])
+
+        cursor.execute("SELECT * FROM product")
+        products = cursor.fetchall
+        for product in products:
+            print("В таблице есть: ", product["name"])
