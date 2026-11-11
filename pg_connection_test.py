@@ -19,4 +19,4 @@ with psycopg.connect(
         cursor.execute("SELECT * FROM product")
         products = cursor.fetchall
         for product in products:
-            print("В таблице есть: ", product["name"])
+            print(product)
