@@ -8,7 +8,7 @@ def create_product(
     name: str,
     price: Decimal,
     stock: int
-):
+) -> tuple | None:
     with connection.cursor() as cursor:
         cursor.execute(
             """
