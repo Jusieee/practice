@@ -4,9 +4,9 @@ import psycopg
 
 from decimal import Decimal
 
-name = "Mechanical keyboard"
-price = Decimal("3499.90")
-stock = 5
+from pg_repositories import create_product
+
+
 password = getpass.getpass("Пароль postgreSQL: ")
 with psycopg.connect(
     host="localhost",
@@ -15,18 +15,10 @@ with psycopg.connect(
     user="postgres",
     password=password
 ) as connection:
-    with connection.cursor() as cursor:
-        cursor.execute("SELECT current_database()")
-        result = cursor.fetchone()
-        print("Текущая база: ", result[0])
-
-        cursor.execute(
-            """
-            INSERT INTO product (name, price, stock)
-            VALUES (%s, %s, %s)
-            RETURNING id, name, price, stock
-            """,
-            (name, price, stock)
-        )
-        product = cursor.fetchone()
-        print(product)
+    product = create_product(
+        connection,
+        "USB Hub",
+        Decimal("1299.90"),
+        4
+    )
+    print(product)
