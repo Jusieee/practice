@@ -21,3 +21,23 @@ def create_product(
         product = cursor.fetchone()
 
     return product
+
+
+def get_product_by_id(
+    connection: psycopg.Connection,
+    product_id: int
+):
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT *
+            FROM product
+            WHERE id = %s
+            """,
+            (product_id,)
+        )
+        product = cursor.fetchone()
+    if product is None:
+        return None
+    else:
+        return product
