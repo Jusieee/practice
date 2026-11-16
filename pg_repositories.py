@@ -30,14 +30,11 @@ def get_product_by_id(
     with connection.cursor() as cursor:
         cursor.execute(
             """
-            SELECT *
+            SELECT id, name, price, stock
             FROM product
             WHERE id = %s
             """,
             (product_id,)
         )
         product = cursor.fetchone()
-    if product is None:
-        return None
-    else:
-        return product
+    return product
