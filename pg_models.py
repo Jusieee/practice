@@ -34,7 +34,8 @@ class Product(Base):
         server_default=text("0")
     )
 
-print(Product.__tablename__)
+if __name__ == "__main__":
+    print(Product.__tablename__)
 
-for column in Product.__table__.columns:
-    print(column.name, column.type)
+    for column in Product.__table__.columns:
+        print(column.name, column.type)
