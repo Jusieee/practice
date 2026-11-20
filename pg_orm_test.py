@@ -32,6 +32,5 @@ with Session(engine) as session:
             print("Остаток: ", product.stock)
         else:
             print("Товар не найден")
-    pass
 
 engine.dispose()
