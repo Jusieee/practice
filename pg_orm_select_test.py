@@ -1,28 +1,13 @@
-import getpass
-
-from sqlalchemy import create_engine, select
-from sqlalchemy.engine import URL
-from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from pg_models import Product
 
 from decimal import Decimal
 
+from pg_database import SessionLocal
 
-password = getpass.getpass("Пароль PostgreSQL:")
 
-database_url = URL.create(
-    "postgresql+psycopg",
-    username="postgres",
-    password=password,
-    host="localhost",
-    port=5432,
-    database="online_shop_pg"
-)
-
-engine = create_engine(database_url)
-
-with (Session(engine) as session):
+with SessionLocal() as session:
     stmt = select(Product)
     products = session.scalars(stmt).all()
 
