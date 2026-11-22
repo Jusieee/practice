@@ -20,7 +20,7 @@ database_url = URL.create(
     database="online_shop_pg"
 )
 
-engine = create_engine(database_url, echo=True)
+engine = create_engine(database_url)
 
 with Session(engine) as session:
     product = session.get(Product, 9)
