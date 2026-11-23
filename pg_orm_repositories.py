@@ -9,3 +9,11 @@ def get_products(session: Session) -> list[Product]:
     products = list(session.scalars(stmt).all())
 
     return products
+
+def get_product_by_id(
+    session: Session,
+    product_id: int
+) -> Product | None:
+    product = session.get(Product, ident=product_id)
+
+    return product
