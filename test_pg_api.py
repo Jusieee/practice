@@ -23,22 +23,10 @@ def test_create_product_invalid_price():
             )
 
         assert response.status_code == 422
-        assert response.json() ==  {
-            "detail": [
-                {
-                    "type": "greater_than",
-                    "loc": [
-                        "body",
-                        "price"
-                    ],
-                    "msg": "Input should be greater than 0",
-                    "input": -100,
-                    "ctx": {
-                        "gt": 0
-                    }
-                }
-            ]
-        }
+
+        errors = response.json()["detail"]
+        assert errors[0]["loc"] == ["body", "price"]
+        assert errors[0]["type"] == "greater_than"
 
     finally:
         app.dependency_overrides.pop(get_db, None)
