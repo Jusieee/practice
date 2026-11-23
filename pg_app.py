@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from pg_database import get_db
 from pg_orm_repositories import get_products, get_product_by_id
-from pg_sсhemas import ProductRead
+from pg_schemas import ProductRead
 
 
 app = FastAPI(title="Online_shop_PostgreSQL")
@@ -16,7 +16,7 @@ def read_products(session: Session = Depends(get_db)):
 
     return products
 
-@app.get("/product/{product_id}", response_model=ProductRead)
+@app.get("/products/{product_id}", response_model=ProductRead)
 def read_product(
     product_id: int,
     session: Session = Depends(get_db)
@@ -28,5 +28,5 @@ def read_product(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Такого товара нету"
         )
-    else:
-        return product
+
+    return product
