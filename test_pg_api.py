@@ -30,3 +30,22 @@ def test_create_product_invalid_price():
 
     finally:
         app.dependency_overrides.pop(get_db, None)
+
+
+def test_create_product_success(pg_client):
+    response = pg_client.post(
+        "products",
+        json={
+            "name": "Test Keyboard",
+            "price": 1990.90,
+            "stock": 5
+        }
+    )
+
+    assert response.status_code == 201
+
+    get_response = pg_client.get(f"/products/{response.json()['id']}")
+    assert get_response.json()["id"] is not None
+    assert get_response.json()["name"] == "Test Keyboard"
+    assert get_response.json()["price"] == "1990.90"
+    assert get_response.json()["stock"] == 5
