@@ -44,8 +44,14 @@ def test_create_product_success(pg_client):
 
     assert response.status_code == 201
 
+    product = response.json()
+    assert product["id"] is not None
+    assert product["name"] == "Test Keyboard"
+    assert product["price"] == "1990.90"
+    assert product["stock"] == 5
+
     get_response = pg_client.get(f"/products/{response.json()['id']}")
-    assert get_response.json()["id"] is not None
+    assert get_response.status_code == 200
     assert get_response.json()["name"] == "Test Keyboard"
     assert get_response.json()["price"] == "1990.90"
     assert get_response.json()["stock"] == 5
