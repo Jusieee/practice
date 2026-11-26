@@ -7,8 +7,10 @@ import os
 from fastapi.testclient import TestClient
 
 from app import app
+from pg_app import app as pg_app
 
 from database import get_db
+from pg_database import get_db as pg_get_db
 
 from dotenv import  load_dotenv
 
@@ -132,3 +134,17 @@ def test_session():
 
     finally:
         test_engine.dispose()
+
+
+@pytest.fixture
+def pg_client(test_session):
+    def override_get_db():
+        yield test_session
+
+    pg_app.dependency_overrides[pg_get_db] = override_get_db()
+
+    try:
+        with TestClient(pg_app) as client:
+            yield client
+    finally:
+        pg_app.dependency_overrides.pop(pg_get_db, None)
