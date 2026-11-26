@@ -141,7 +141,7 @@ def pg_client(test_session):
     def override_get_db():
         yield test_session
 
-    pg_app.dependency_overrides[pg_get_db] = override_get_db()
+    pg_app.dependency_overrides[pg_get_db] = override_get_db
 
     try:
         with TestClient(pg_app) as client:

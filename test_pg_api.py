@@ -34,10 +34,10 @@ def test_create_product_invalid_price():
 
 def test_create_product_success(pg_client):
     response = pg_client.post(
-        "products",
+        "/products",
         json={
             "name": "Test Keyboard",
-            "price": 1990.90,
+            "price": "1990.90",
             "stock": 5
         }
     )
