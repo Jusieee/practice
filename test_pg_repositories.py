@@ -36,18 +36,23 @@ def test_session():
 
     try:
         with test_engine.connect() as connection:
-            actual_db = connection.exec_driver_sql(
-                "SELECT current_database()"
-            ).scalar_one()
+            transaction = connection.begin()
 
-        if actual_db != "online_shop_test":
-            raise RuntimeError("Подключение не к тестовой базе!")
-
-        with Session(test_engine) as session:
             try:
-                yield session
+                actual_db = connection.exec_driver_sql(
+                    "SELECT current_database()"
+                ).scalar_one()
+
+                if actual_db != "online_shop_test":
+                    raise RuntimeError("Подключение не к той базе!")
+
+                with Session(
+                    bind=connection,
+                    join_transaction_mode="create_savepoint"
+                ) as session:
+                    yield session
             finally:
-                session.rollback()
+                transaction.rollback()
 
     finally:
         test_engine.dispose()
@@ -65,3 +70,4 @@ def test_create_product(test_session):
     assert product.name == "Test Mouse"
     assert product.price == Decimal("999.90")
     assert product.stock == 5
+    test_session.commit()
