@@ -2,11 +2,19 @@ import pytest
 
 import sqlite3
 
+import os
+
 from fastapi.testclient import TestClient
 
 from app import app
 
 from database import get_db
+
+from dotenv import  load_dotenv
+
+from sqlalchemy import create_engine
+from sqlalchemy.engine import URL
+from sqlalchemy.orm import Session
 
 
 SCHEMA = """
@@ -80,3 +88,47 @@ def client(db_path):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def test_session():
+    load_dotenv()
+
+    test_db_name = os.environ["DB_TEST_NAME"]
+
+    if test_db_name != "online_shop_test":
+        raise RuntimeError("Неверная тестовая база!")
+
+    database_url = URL.create(
+        "postgresql+psycopg",
+        username=os.environ["DB_USER"],
+        password=os.environ["DB_PASSWORD"],
+        host=os.environ["DB_HOST"],
+        port=int(os.environ["DB_PORT"]),
+        database=test_db_name
+    )
+
+    test_engine = create_engine(database_url)
+
+    try:
+        with test_engine.connect() as connection:
+            transaction = connection.begin()
+
+            try:
+                actual_db = connection.exec_driver_sql(
+                    "SELECT current_database()"
+                ).scalar_one()
+
+                if actual_db != "online_shop_test":
+                    raise RuntimeError("Подключение не к той базе!")
+
+                with Session(
+                    bind=connection,
+                    join_transaction_mode="create_savepoint"
+                ) as session:
+                    yield session
+            finally:
+                transaction.rollback()
+
+    finally:
+        test_engine.dispose()
