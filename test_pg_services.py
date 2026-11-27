@@ -16,14 +16,14 @@ def test_session_recovery_after_integrity_error(test_session):
             5
         )
 
-    response = create_product_service(
+    product = create_product_service(
         test_session,
         "Valid Mouse",
         Decimal("999.90"),
         5
     )
 
-    assert response.id is not None
-    assert response.name == "Valid Mouse"
-    assert response.price == Decimal("999.90")
-    assert response.stock == 5
+    assert product.id is not None
+    assert product.name == "Valid Mouse"
+    assert product.price == Decimal("999.90")
+    assert product.stock == 5
