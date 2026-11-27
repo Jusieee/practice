@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import Identity, Integer, Numeric, String, text
+from sqlalchemy import Identity, Integer, Numeric, String, text, CheckConstraint
 
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -11,6 +11,17 @@ class Base(DeclarativeBase):
 
 class Product(Base):
     __tablename__ = "product"
+
+    __table_args__ = (
+        CheckConstraint(
+            "price > 0",
+            name="check_product_price"
+        ),
+        CheckConstraint(
+            "stock >= 0",
+            name="check_product_stock"
+        )
+    )
 
     id: Mapped[int] = mapped_column(
         Integer,
