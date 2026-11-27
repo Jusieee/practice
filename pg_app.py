@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from pg_database import get_db
-from pg_orm_repositories import get_products, get_product_by_id, create_product
+from pg_orm_repositories import get_products, get_product_by_id
 from pg_schemas import ProductRead, ProductCreate
 from pg_services import create_product_service
 
