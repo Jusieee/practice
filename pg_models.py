@@ -1,7 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import Identity, Integer, Numeric, String, text, CheckConstraint
-
+from sqlalchemy import Identity, Integer, Numeric, String, text, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -20,6 +19,10 @@ class Product(Base):
         CheckConstraint(
             "stock >= 0",
             name="check_product_stock"
+        ),
+        UniqueConstraint(
+            "uq_product_name",
+            name="Mouse"
         )
     )
 
