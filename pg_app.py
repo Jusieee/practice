@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from pg_database import get_db
 from pg_orm_repositories import get_products, get_product_by_id, create_product
 from pg_schemas import ProductRead, ProductCreate
+from pg_services import create_product_service
 
 
 app = FastAPI(title="Online_shop_PostgreSQL")
@@ -42,14 +43,11 @@ def add_product(
     product_data: ProductCreate,
     session: Session = Depends(get_db)
 ):
-    product = create_product(
-        session,
-        product_data.name,
-        product_data.price,
-        product_data.stock
+    product = create_product_service(
+        session=session,
+        name=product_data.name,
+        price=product_data.price,
+        stock=product_data.stock
     )
-
-    session.commit()
-    session.refresh(product)
 
     return product
