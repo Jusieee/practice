@@ -35,3 +35,25 @@ def test_create_product_invalid_price(test_session):
         exc_info.value.orig.diag.constraint_name
         == "check_product_price"
     )
+
+
+def test_create_duplicate_product(test_session):
+    create_product(
+        test_session,
+        "Test Mouse",
+        Decimal("999.90"),
+        5
+    )
+
+    with pytest.raises(IntegrityError) as exc_info:
+        create_product(
+            test_session,
+            "Test Mouse",
+            Decimal("1999.90"),
+            10
+        )
+
+    assert (
+        exc_info.value.orig.diag.constraint_name
+        == "uq_product_name"
+    )
