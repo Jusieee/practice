@@ -21,8 +21,8 @@ class Product(Base):
             name="check_product_stock"
         ),
         UniqueConstraint(
-            "uq_product_name",
-            name="Mouse"
+            "name",
+            name="uq_product_name"
         )
     )
 
