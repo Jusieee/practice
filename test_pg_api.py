@@ -55,3 +55,29 @@ def test_create_product_success(pg_client):
     assert get_response.json()["name"] == "Test Keyboard"
     assert get_response.json()["price"] == "1990.90"
     assert get_response.json()["stock"] == 5
+
+
+def test_create_duplicate_product(pg_client):
+    data = {
+        "name": "Test Keyboard",
+        "price": "1990.90",
+        "stock": 5
+    }
+
+    first_response = pg_client.post(
+        "/products",
+        json=data
+    )
+    assert first_response.status_code == 201
+
+    second_response = pg_client.post(
+        "/products",
+        json=data
+    )
+    assert second_response.status_code == 409
+    assert second_response.json() == {
+        "detail": "Товар с таким названием уже существует"
+    }
+
+    product = pg_client.get(f"/products/{first_response.json()['id']}")
+    assert product is not None
