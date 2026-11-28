@@ -6,6 +6,7 @@ from pg_database import get_db
 from pg_orm_repositories import get_products, get_product_by_id
 from pg_schemas import ProductRead, ProductCreate
 from pg_services import create_product_service
+from pg_exceptions import DuplicateProductError
 
 
 app = FastAPI(title="Online_shop_PostgreSQL")
@@ -43,11 +44,18 @@ def add_product(
     product_data: ProductCreate,
     session: Session = Depends(get_db)
 ):
-    product = create_product_service(
-        session=session,
-        name=product_data.name,
-        price=product_data.price,
-        stock=product_data.stock
-    )
+    try:
+        product = create_product_service(
+            session=session,
+            name=product_data.name,
+            price=product_data.price,
+            stock=product_data.stock
+        )
 
-    return product
+        return product
+
+    except DuplicateProductError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc)
+        )
