@@ -80,4 +80,5 @@ def test_create_duplicate_product(pg_client):
     }
 
     product = pg_client.get(f"/products/{first_response.json()['id']}")
-    assert product is not None
+    assert product.status_code == 200
+    assert product.json() == first_response.json()
