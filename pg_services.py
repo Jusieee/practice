@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 from pg_models import Product
 from pg_orm_repositories import create_product
+from pg_exceptions import DuplicateProductError
 
 
 def create_product_service(
@@ -23,9 +24,16 @@ def create_product_service(
 
         session.commit()
 
-    except IntegrityError:
+    except IntegrityError as exc:
         session.rollback()
-        raise
+        constraint_name = exc.orig.diag.constraint_name
+
+        if constraint_name == "uq_product_name":
+            raise DuplicateProductError(
+                "Товар с таким названием уже существует"
+            ) from exc
+        else:
+            raise IntegrityError
 
     session.refresh(product)
 
