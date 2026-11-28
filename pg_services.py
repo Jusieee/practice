@@ -32,8 +32,7 @@ def create_product_service(
             raise DuplicateProductError(
                 "Товар с таким названием уже существует"
             ) from exc
-        else:
-            raise IntegrityError
+        raise
 
     session.refresh(product)
 
